@@ -1,0 +1,11 @@
+services:
+  - name: astralia-frontend
+    type: web
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

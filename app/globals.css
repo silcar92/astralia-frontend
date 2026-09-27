@@ -1,8 +1,15 @@
-@import "tailwindcss";
+@import "@heroui/styles";
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1b1c2a;
+
+  /* Astralia brand — PRD §27: Elegant Astrology + Dreamy Galaxy */
+  --astralia-midnight: #1a1a2e;
+  --astralia-lilac: #c8b6ff;
+  --astralia-gold: #d4af7a;
+  --astralia-soft-white: #f7f5ff;
+  --astralia-nebula-pink: #e8a0c4;
 }
 
 @theme inline {
@@ -14,8 +21,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: var(--astralia-midnight);
+    --foreground: var(--astralia-soft-white);
   }
 }
 
