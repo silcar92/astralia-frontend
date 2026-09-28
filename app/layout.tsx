@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${cormorantGaramond.variable} ${nunitoSans.variable} antialiased`}>
+      <body className={`${cormorantGaramond.variable} ${nunitoSans.variable} antialiased`} suppressHydrationWarning>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
