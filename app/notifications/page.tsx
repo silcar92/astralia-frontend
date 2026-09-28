@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/hooks/useAuth";
+import { relativeTime } from "@/lib/time";
 import { ApiError } from "@/services/apiClient";
 import * as connectionService from "@/services/connectionService";
 import * as notificationService from "@/services/notificationService";
@@ -48,18 +49,6 @@ const FALLBACK_ICON = (
 );
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "ahora";
-  if (minutes < 60) return `hace ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `hace ${hours} h`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "ayer";
-  return `hace ${days} días`;
-}
 
 function groupOf(iso: string): "Hoy" | "Esta semana" | "Antes" {
   const created = new Date(iso);
