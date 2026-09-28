@@ -1,12 +1,17 @@
 import { useAuthContext } from "@/contexts/AuthContext";
 
 export function useAuth() {
-  const { user, setUser } = useAuthContext();
+  const { status, profile, register, login, logout, refreshProfile } = useAuthContext();
 
   return {
-    user,
-    isAuthenticated: user !== null,
-    isVerified: user?.verificationStatus === "approved",
-    setUser,
+    status,
+    profile,
+    isAuthenticated: status === "authenticated",
+    needsOnboarding: status === "needs_onboarding",
+    isVerified: profile?.verification_status === "approved",
+    register,
+    login,
+    logout,
+    refreshProfile,
   };
 }
