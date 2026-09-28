@@ -13,6 +13,7 @@ import { ApiError } from "@/services/apiClient";
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
     try {
-      await register(email, password);
+      await register(name, email, password);
       router.push("/onboarding");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -55,6 +56,15 @@ export default function RegisterPage() {
 
         <GlassCard className="mt-8 flex flex-col gap-4">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <TextField
+              label="Nombre"
+              type="text"
+              name="name"
+              autoComplete="given-name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <TextField
               label="Email"
               type="email"

@@ -11,7 +11,7 @@ type SessionStatus = "loading" | "guest" | "needs_onboarding" | "authenticated";
 type AuthContextValue = {
   status: SessionStatus;
   profile: Profile | null;
-  register: (email: string, password: string) => Promise<SessionStatus>;
+  register: (name: string, email: string, password: string) => Promise<SessionStatus>;
   login: (email: string, password: string) => Promise<SessionStatus>;
   logout: () => void;
   refreshProfile: () => Promise<SessionStatus>;
@@ -51,8 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const register = async (email: string, password: string): Promise<SessionStatus> => {
-    const tokens = await authService.register(email, password);
+  const register = async (name: string, email: string, password: string): Promise<SessionStatus> => {
+    const tokens = await authService.register(name, email, password);
     setTokens(tokens);
     setStatus("needs_onboarding");
     return "needs_onboarding";

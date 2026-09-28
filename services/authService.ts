@@ -1,9 +1,9 @@
 import { apiFetch, type AuthTokens } from "./apiClient";
 
-export function register(email: string, password: string): Promise<AuthTokens> {
+export function register(name: string, email: string, password: string): Promise<AuthTokens> {
   return apiFetch<AuthTokens>("/api/v1/accounts/register/", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ name, email, password }),
   });
 }
 
