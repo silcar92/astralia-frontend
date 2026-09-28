@@ -35,3 +35,10 @@ export function createProfile(payload: CreateProfilePayload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function updateBio(bio: string) {
+  return apiFetch<{ bio: string }>("/api/v1/accounts/profile/me/", {
+    method: "PATCH",
+    body: JSON.stringify({ bio }),
+  });
+}

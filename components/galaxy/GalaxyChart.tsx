@@ -1,3 +1,7 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 import type { GalaxyStar } from "@/services/galaxyService";
 
 const CENTER = { x: 175, y: 270 };
@@ -36,6 +40,7 @@ function layout(stars: GalaxyStar[]) {
 }
 
 export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
+  const router = useRouter();
   const placed = layout(stars);
 
   return (
@@ -94,7 +99,17 @@ export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
         ))}
       </g>
 
-      <g>
+      <g
+        role="link"
+        tabIndex={0}
+        aria-label="Ver mi perfil"
+        style={{ cursor: "pointer" }}
+        onClick={() => router.push("/profile")}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") router.push("/profile");
+        }}
+      >
+        <circle cx={CENTER.x} cy={CENTER.y} r="26" fill="transparent" />
         <circle cx={CENTER.x} cy={CENTER.y} r="20" fill={GOLD} opacity="0.18" />
         <use href="#star5" fill={GOLD} stroke="#F3E9C8" strokeWidth="0.4" transform={`translate(${CENTER.x},${CENTER.y}) scale(13)`} />
         <text x={CENTER.x} y={CENTER.y + 30} textAnchor="middle" fontFamily="Cormorant Garamond" fontSize="14" fontWeight="600" fill="#F3E9C8">

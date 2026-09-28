@@ -17,6 +17,9 @@ export function login(email: string, password: string): Promise<AuthTokens> {
 
 export type Profile = {
   id: number;
+  name: string;
+  age: number;
+  interest_names: string[];
   city: string;
   country: string;
   age_segment: "youth" | "adult";

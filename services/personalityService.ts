@@ -25,3 +25,7 @@ export function submitPersonalityTest(
     body: JSON.stringify({ test_length: testLength, answers }),
   });
 }
+
+export function fetchMyPersonalityResult(): Promise<PersonalityResult> {
+  return apiFetch("/api/v1/personality/result/");
+}
