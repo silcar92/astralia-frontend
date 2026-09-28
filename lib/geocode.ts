@@ -17,8 +17,13 @@ export async function geocodePlace(query: string): Promise<GeocodeResult | null>
   const results = (await res.json()) as { lat: string; lon: string; display_name: string }[];
   if (results.length === 0) return null;
 
+  // el backend guarda lat/lon con 6 decimales (~10 cm); Nominatim devuelve hasta 7 y el serializer los rechaza
   const [first] = results;
-  return { latitude: parseFloat(first.lat), longitude: parseFloat(first.lon), displayName: first.display_name };
+  return {
+    latitude: Number(parseFloat(first.lat).toFixed(6)),
+    longitude: Number(parseFloat(first.lon).toFixed(6)),
+    displayName: first.display_name,
+  };
 }
 
 export function browserTimezone(): string {
