@@ -6,6 +6,7 @@ export type SuggestionCard = {
   age: number;
   city: string;
   country: string;
+  distance_km: number | null;
   chart_highlights: { sun?: string; moon?: string; ascendant?: string };
   shared_interests: string[];
   compatibility_score: string;
