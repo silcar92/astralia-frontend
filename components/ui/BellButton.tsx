@@ -1,6 +1,23 @@
-import Link from "next/link";
+"use client";
 
-export function BellButton({ hasAlert = false }: { hasAlert?: boolean }) {
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { useAuth } from "@/hooks/useAuth";
+import * as notificationService from "@/services/notificationService";
+
+export function BellButton() {
+  const { status } = useAuth();
+  const [hasAlert, setHasAlert] = useState(false);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    notificationService
+      .fetchUnreadCount()
+      .then((res) => setHasAlert(res.unread > 0))
+      .catch(() => {});
+  }, [status]);
+
   return (
     <Link
       href="/notifications"
