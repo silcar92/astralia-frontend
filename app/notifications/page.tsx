@@ -5,12 +5,19 @@ import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
+import * as connectionService from "@/services/connectionService";
 import * as notificationService from "@/services/notificationService";
 import type { AppNotification } from "@/services/notificationService";
 
 const ICON_PROPS = { width: 16, height: 16, viewBox: "0 0 24 24" } as const;
 
 const ICONS: Record<string, ReactNode> = {
+  connection_request: (
+    <svg {...ICON_PROPS} fill="none" stroke="currentColor" strokeWidth="1.6">
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c.6-3.5 3-5.5 6.5-5.5M18 9v6M15 12h6" />
+    </svg>
+  ),
   connection_accepted: (
     <svg {...ICON_PROPS} fill="currentColor" stroke="none">
       <path d="M12 21s-7-4.5-9.5-9C.7 8.2 2.6 5 6 5c2 0 3.5 1.2 4 2.5C10.5 6.2 12 5 14 5c3.4 0 5.3 3.2 3.5 7-2.5 4.5-9.5 9-9.5 9z" />
@@ -71,6 +78,7 @@ export default function NotificationsPage() {
   const { status } = useAuth();
   const [items, setItems] = useState<AppNotification[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [accepted, setAccepted] = useState<Record<number, "ok" | "done" | "busy">>({});
 
   useEffect(() => {
     if (status === "loading") return;
@@ -102,6 +110,27 @@ export default function NotificationsPage() {
     }
     const destination = destinationOf(n);
     if (destination) router.push(destination);
+  };
+
+  const handleAccept = async (n: AppNotification) => {
+    if (!n.target_id) return;
+    setAccepted((prev) => ({ ...prev, [n.id]: "busy" }));
+    try {
+      await connectionService.acceptConnection(n.target_id);
+      setAccepted((prev) => ({ ...prev, [n.id]: "ok" }));
+    } catch (err) {
+      // 404: la solicitud ya no está pendiente (ya aceptada o desconectada)
+      const alreadyHandled = err instanceof ApiError && err.status === 404;
+      setAccepted((prev) => {
+        const { [n.id]: _omit, ...rest } = prev;
+        return alreadyHandled ? { ...rest, [n.id]: "done" } : rest;
+      });
+      if (!alreadyHandled) setError("No pudimos aceptar la solicitud. Intenta de nuevo.");
+    }
+    if (!n.read_at) {
+      notificationService.markRead(n.id).catch(() => {});
+      setItems((prev) => prev?.map((i) => (i.id === n.id ? { ...i, read_at: new Date().toISOString() } : i)) ?? null);
+    }
   };
 
   const handleMarkAll = () => {
@@ -163,36 +192,60 @@ export default function NotificationsPage() {
             <div className="flex flex-col gap-2.5">
               {group.list.map((n) => {
                 const unread = !n.read_at;
+                const state = accepted[n.id];
                 return (
-                  <button
+                  <div
                     key={n.id}
-                    type="button"
-                    onClick={() => handleOpen(n)}
-                    className="flex gap-3 items-start p-3 rounded-2xl text-left"
+                    className="rounded-2xl"
                     style={{ background: unread ? "rgba(255,255,255,0.05)" : "transparent" }}
                   >
-                    <div
-                      className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center"
-                      style={{
-                        background: unread ? "rgba(232,217,181,0.18)" : "rgba(255,255,255,0.06)",
-                        border: `1px solid ${unread ? "rgba(232,217,181,0.4)" : "rgba(255,255,255,0.15)"}`,
-                        color: unread ? "#E8D9B5" : "#B9A8DE",
-                      }}
+                    <button
+                      type="button"
+                      onClick={() => handleOpen(n)}
+                      className="flex gap-3 items-start p-3 w-full text-left"
                     >
-                      {ICONS[n.type] ?? FALLBACK_ICON}
-                    </div>
-                    <div className="flex-grow">
-                      <div className="text-[13px] leading-[1.4]" style={{ color: unread ? undefined : "#D9D5E8" }}>
-                        {n.body}
+                      <div
+                        className="w-9 h-9 shrink-0 rounded-full flex items-center justify-center"
+                        style={{
+                          background: unread ? "rgba(232,217,181,0.18)" : "rgba(255,255,255,0.06)",
+                          border: `1px solid ${unread ? "rgba(232,217,181,0.4)" : "rgba(255,255,255,0.15)"}`,
+                          color: unread ? "#E8D9B5" : "#B9A8DE",
+                        }}
+                      >
+                        {ICONS[n.type] ?? FALLBACK_ICON}
                       </div>
-                      <div className="text-[10px] mt-1" style={{ color: "#8E7FB0" }}>
-                        {relativeTime(n.created_at)}
+                      <div className="flex-grow">
+                        <div className="text-[13px] leading-[1.4]" style={{ color: unread ? undefined : "#D9D5E8" }}>
+                          {n.body}
+                        </div>
+                        <div className="text-[10px] mt-1" style={{ color: "#8E7FB0" }}>
+                          {relativeTime(n.created_at)}
+                        </div>
                       </div>
-                    </div>
-                    {unread && (
-                      <span className="w-[7px] h-[7px] mt-1.5 shrink-0 rounded-full" style={{ background: "var(--astralia-alert)" }} />
+                      {unread && (
+                        <span className="w-[7px] h-[7px] mt-1.5 shrink-0 rounded-full" style={{ background: "var(--astralia-alert)" }} />
+                      )}
+                    </button>
+                    {n.type === "connection_request" && (
+                      <div className="px-3 pb-3 pl-[60px]">
+                        {state === "ok" || state === "done" ? (
+                          <span className="text-[11px]" style={{ color: "#E8D9B5" }}>
+                            {state === "ok" ? "Conectados — ya brilla en tu Galaxia." : "Solicitud ya atendida."}
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleAccept(n)}
+                            disabled={state === "busy"}
+                            className="text-[12px] font-semibold rounded-full px-4 py-1.5 disabled:opacity-60"
+                            style={{ background: "var(--astralia-gold)", color: "#221A3B" }}
+                          >
+                            Aceptar
+                          </button>
+                        )}
+                      </div>
                     )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
