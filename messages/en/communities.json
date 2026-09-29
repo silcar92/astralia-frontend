@@ -21,7 +21,9 @@
   "pending": "Pending",
   "unavailable": "Unavailable",
   "join": "Join",
-  "request": "Request"
+  "request": "Request",
+  "creator": "Creator",
+  "moderator": "Moderator"
  },
  "new": {
   "title": "New community",

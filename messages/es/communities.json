@@ -21,7 +21,9 @@
   "pending": "Pendiente",
   "unavailable": "No disponible",
   "join": "Unirse",
-  "request": "Solicitar"
+  "request": "Solicitar",
+  "creator": "Creador",
+  "moderator": "Moderador"
  },
  "new": {
   "title": "Nueva comunidad",

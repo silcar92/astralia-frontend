@@ -19,7 +19,7 @@ export function JoinButton({
   if (community.my_status === "approved") {
     return (
       <span className={chip} style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}>
-        {t("member")}
+        {community.is_creator ? t("creator") : community.is_moderator ? t("moderator") : t("member")}
       </span>
     );
   }

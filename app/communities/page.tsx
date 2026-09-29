@@ -21,7 +21,7 @@ export default function CommunitiesPage() {
   const t = useTranslations("communities");
   const errorMessage = useErrorMessage();
   const memberLabel = useMemberLabel();
-  const { status, profile } = useAuth();
+  const { status, profile, refreshProfile } = useAuth();
   const [communities, setCommunities] = useState<Community[] | null>(null);
   const [tab, setTab] = useState<Tab | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +37,9 @@ export default function CommunitiesPage() {
       router.replace("/onboarding");
       return;
     }
+
+    // el permiso de creador puede haberse aprobado después de iniciar sesión
+    refreshProfile().catch(() => {});
 
     communityService
       .fetchCommunities()
