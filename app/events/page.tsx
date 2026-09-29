@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
 import { EventCard } from "@/components/events/EventCard";
-import { BellButton } from "@/components/ui/BellButton";
+import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
 import * as eventService from "@/services/eventService";
@@ -92,7 +92,7 @@ export default function EventsPage() {
           >
             + Organizar
           </Link>
-          <BellButton />
+          <HeaderActions />
         </div>
       </div>
 

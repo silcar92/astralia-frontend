@@ -7,7 +7,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { ComposeSheet } from "@/components/cosmos/ComposeSheet";
 import { PostCard } from "@/components/cosmos/PostCard";
 import { StoriesRow } from "@/components/cosmos/StoriesRow";
-import { BellButton } from "@/components/ui/BellButton";
+import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { usePostLikes } from "@/hooks/usePostLikes";
 import { ApiError } from "@/services/apiClient";
@@ -66,7 +66,7 @@ export default function CosmosPage() {
         <div className="text-[26px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
           Cosmos
         </div>
-        <BellButton />
+        <HeaderActions />
       </div>
 
       <StoriesRow stories={stories} onAdd={() => setComposing("story")} />

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
 import { GalaxyChart } from "@/components/galaxy/GalaxyChart";
-import { BellButton } from "@/components/ui/BellButton";
+import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
 import * as galaxyService from "@/services/galaxyService";
@@ -56,7 +56,7 @@ export default function MyGalaxyPage() {
         <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 600, fontStyle: "italic" }}>
           Mi Galaxia
         </div>
-        <BellButton />
+        <HeaderActions />
       </div>
 
       <div className="flex-grow relative" style={{ marginTop: 6, minHeight: 420 }}>

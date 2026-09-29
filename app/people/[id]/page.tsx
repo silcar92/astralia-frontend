@@ -140,6 +140,10 @@ export default function PersonProfilePage() {
             />
           </div>
 
+          <p className="text-[9px] leading-[1.4] text-center mt-2 mb-1 px-3" style={{ color: "#8E7FB0" }}>
+  La astrología en Astralia es una herramienta de autoconocimiento y compatibilidad, no una predicción.
+</p>
+
           {person.cosmic_name && (
             <div
               className="flex items-center justify-center my-2.5 px-4 py-2.5 rounded-2xl"

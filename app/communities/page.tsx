@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 import { CommunityBanner, memberLabel } from "@/components/communities/CommunityBanner";
 import { JoinButton } from "@/components/communities/JoinButton";
-import { BellButton } from "@/components/ui/BellButton";
+import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
 import * as communityService from "@/services/communityService";
@@ -92,7 +92,7 @@ export default function CommunitiesPage() {
               + Crear
             </Link>
           )}
-          <BellButton />
+          <HeaderActions />
         </div>
       </div>
 

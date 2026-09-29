@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
 import { SuggestionCard } from "@/components/discover/SuggestionCard";
-import { BellButton } from "@/components/ui/BellButton";
+import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
 import * as discoveryService from "@/services/discoveryService";
@@ -65,7 +65,7 @@ export default function DiscoverPage() {
         <span className="text-[11px] tracking-[2px] uppercase" style={{ color: "var(--astralia-lilac)" }}>
           {TODAY}
         </span>
-        <BellButton />
+        <HeaderActions />
       </div>
 
       <h1
