@@ -35,6 +35,7 @@ export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLik
           </div>
           <div className="text-[10px]" style={{ color: "#B9A8DE" }}>
             {relativeTime(post.created_at)}
+            {post.community_name ? ` · en ${post.community_name}` : ""}
           </div>
         </div>
       </div>

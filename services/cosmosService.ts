@@ -6,6 +6,7 @@ export type CosmosPost = {
   author_name: string | null;
   is_mine: boolean;
   community: number | null;
+  community_name: string | null;
   content_type: "text" | "photo" | "video" | "poll" | "story";
   text: string;
   media: string | null;
@@ -18,18 +19,18 @@ export type CosmosPost = {
 
 type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
 
-export function fetchFeed(): Promise<Paginated<CosmosPost>> {
-  return apiFetch("/api/v1/cosmos/feed/?page_size=50");
+export function fetchFeed(communityId?: number): Promise<Paginated<CosmosPost>> {
+  return apiFetch(`/api/v1/cosmos/feed/?page_size=50${communityId ? `&community=${communityId}` : ""}`);
 }
 
 export function fetchStories(): Promise<Paginated<CosmosPost>> {
   return apiFetch("/api/v1/cosmos/stories/?page_size=50");
 }
 
-export function createPost(text: string, contentType: "text" | "story"): Promise<CosmosPost> {
+export function createPost(text: string, contentType: "text" | "story", communityId?: number): Promise<CosmosPost> {
   return apiFetch("/api/v1/cosmos/feed/", {
     method: "POST",
-    body: JSON.stringify({ content_type: contentType, text }),
+    body: JSON.stringify({ content_type: contentType, text, ...(communityId ? { community: communityId } : {}) }),
   });
 }
 

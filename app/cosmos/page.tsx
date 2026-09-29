@@ -9,6 +9,7 @@ import { PostCard } from "@/components/cosmos/PostCard";
 import { StoriesRow } from "@/components/cosmos/StoriesRow";
 import { BellButton } from "@/components/ui/BellButton";
 import { useAuth } from "@/hooks/useAuth";
+import { usePostLikes } from "@/hooks/usePostLikes";
 import { ApiError } from "@/services/apiClient";
 import * as cosmosService from "@/services/cosmosService";
 import type { CosmosPost } from "@/services/cosmosService";
@@ -57,19 +58,7 @@ export default function CosmosPage() {
     }
   };
 
-  const handleToggleLike = async (post: CosmosPost) => {
-    const wasLiked = post.my_reaction === "like";
-    const apply = (mine: string | null, count: number) =>
-      setPosts((prev) => prev?.map((p) => (p.id === post.id ? { ...p, my_reaction: mine, reaction_count: count } : p)) ?? null);
-
-    apply(wasLiked ? null : "like", Math.max(0, post.reaction_count + (wasLiked ? -1 : 1)));
-    try {
-      const res = await cosmosService.toggleLike(post.id);
-      apply(res.type, res.reaction_count);
-    } catch {
-      apply(post.my_reaction, post.reaction_count);
-    }
-  };
+  const handleToggleLike = usePostLikes(setPosts);
 
   return (
     <main className="flex min-h-screen flex-col px-[22px] pt-[30px]" style={{ fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}>
