@@ -1,3 +1,4 @@
+import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import type { SuggestionCard } from "@/services/discoveryService";
 
 function distanceLabel(km: number | null): string | null {
@@ -21,7 +22,7 @@ export function StormCard({ suggestion }: { suggestion: SuggestionCard }) {
         }}
       />
       <div
-        className="absolute inset-0 rounded-3xl p-[22px] flex flex-col items-center text-center backdrop-blur-md"
+        className="absolute inset-0 rounded-3xl p-[22px] flex flex-col items-center text-center backdrop-blur-md overflow-y-auto"
         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.35)" }}
       >
         <div
@@ -40,6 +41,15 @@ export function StormCard({ suggestion }: { suggestion: SuggestionCard }) {
         <div className="text-xs mt-0.5" style={{ color: "#B9A8DE" }}>
           {suggestion.city}
           {distance ? ` · ${distance}` : ""}
+        </div>
+
+        <div className="mt-3 w-full">
+          <PlacementsRow
+            sun={suggestion.chart_highlights.sun}
+            moon={suggestion.chart_highlights.moon}
+            ascendant={suggestion.chart_highlights.ascendant}
+            compact
+          />
         </div>
 
         <div

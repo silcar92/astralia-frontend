@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { AscendantGlyph, MoonGlyph, SIGN_LABELS, SunGlyph } from "@/components/astrology/glyphs";
-import { Constellation } from "@/components/astrology/Constellation";
+import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import * as astrologyService from "@/services/astrologyService";
@@ -16,18 +15,6 @@ import type { PersonalityResult } from "@/services/personalityService";
 import * as profileService from "@/services/profileService";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-function PlacementColumn({ glyph, label, sign }: { glyph: React.ReactNode; label: string; sign?: string }) {
-  return (
-    <div className="flex-1 flex flex-col items-center">
-      {glyph}
-      {sign && <Constellation sign={sign} />}
-      <div className="text-[8px] tracking-[0.5px] uppercase mt-1 text-center" style={{ color: "#D9C9F0" }}>
-        {label} · {sign ? SIGN_LABELS[sign] ?? sign : "—"}
-      </div>
-    </div>
-  );
-}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -162,10 +149,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="flex justify-between gap-1.5 mt-3.5 mb-2">
-        <PlacementColumn glyph={<SunGlyph />} label="Sol" sign={sun} />
-        <PlacementColumn glyph={<MoonGlyph />} label="Luna" sign={moon} />
-        <PlacementColumn glyph={<AscendantGlyph />} label="Asc." sign={ascendant} />
+      <div className="mt-3.5 mb-2">
+        <PlacementsRow sun={sun} moon={moon} ascendant={ascendant} />
       </div>
 
       {personality && (

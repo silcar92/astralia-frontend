@@ -59,6 +59,7 @@ export function decideRequest(communityId: number, membershipId: number, action:
 
 export type CommunityMember = {
   id: number;
+  user_id: number;
   user_name: string;
   is_moderator: boolean;
   is_creator: boolean;

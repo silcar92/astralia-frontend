@@ -1,11 +1,6 @@
+import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { GoldButton } from "@/components/ui/GoldButton";
 import type { SuggestionCard as SuggestionCardType } from "@/services/discoveryService";
-
-const SIGN_LABELS: Record<string, string> = {
-  aries: "Aries", taurus: "Tauro", gemini: "Géminis", cancer: "Cáncer", leo: "Leo", virgo: "Virgo",
-  libra: "Libra", scorpio: "Escorpio", sagittarius: "Sagitario", capricorn: "Capricornio",
-  aquarius: "Acuario", pisces: "Piscis",
-};
 
 export function SuggestionCard({
   suggestion,
@@ -19,8 +14,6 @@ export function SuggestionCard({
   loading: boolean;
 }) {
   const score = Math.round(parseFloat(suggestion.compatibility_score));
-  const moonSign = suggestion.chart_highlights.moon ? SIGN_LABELS[suggestion.chart_highlights.moon] : null;
-  const ascSign = suggestion.chart_highlights.ascendant ? SIGN_LABELS[suggestion.chart_highlights.ascendant] : null;
 
   return (
     <div
@@ -48,11 +41,14 @@ export function SuggestionCard({
       <div className="mt-0.5 text-xs" style={{ color: "var(--astralia-lilac)" }}>
         {suggestion.city}, {suggestion.country}
       </div>
-      {(moonSign || ascSign) && (
-        <div className="mt-2.5 text-[11px]" style={{ color: "var(--astralia-lilac-soft)" }}>
-          {[moonSign && `Luna en ${moonSign}`, ascSign && `Asc. ${ascSign}`].filter(Boolean).join(" · ")}
-        </div>
-      )}
+      <div className="mt-3 w-full">
+        <PlacementsRow
+          sun={suggestion.chart_highlights.sun}
+          moon={suggestion.chart_highlights.moon}
+          ascendant={suggestion.chart_highlights.ascendant}
+          compact
+        />
+      </div>
 
       <div className="my-5 relative w-[110px] h-[110px] flex items-center justify-center">
         <div

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import * as communityService from "@/services/communityService";
@@ -73,7 +74,13 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
               <div className="w-9 h-9 rounded-full shrink-0" style={{ background: "#2C2249", border: "1px solid #E8D9B5" }} />
               <div className="flex-grow min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold truncate">{member.is_me ? "Tú" : member.user_name}</span>
+                  {member.is_me ? (
+                    <span className="text-[13px] font-bold truncate">Tú</span>
+                  ) : (
+                    <Link href={`/people/${member.user_id}`} className="text-[13px] font-bold truncate underline-offset-2 hover:underline">
+                      {member.user_name}
+                    </Link>
+                  )}
                   {member.is_creator && (
                     <span className={CHIP} style={{ background: "rgba(232,217,181,0.2)", color: "#F3E9C8" }}>
                       Creador

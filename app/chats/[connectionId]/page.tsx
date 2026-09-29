@@ -107,12 +107,20 @@ export default function ChatConversationPage() {
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </Link>
-        <span
-          className="text-[18px] font-semibold italic"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
-          {conversation?.other_user_name ?? "Chat"}
-        </span>
+        {conversation ? (
+          <Link
+            href={`/people/${conversation.other_user_id}`}
+            aria-label={`Ver perfil de ${conversation.other_user_name}`}
+            className="text-[18px] font-semibold italic"
+            style={{ fontFamily: "var(--font-serif)" }}
+          >
+            {conversation.other_user_name}
+          </Link>
+        ) : (
+          <span className="text-[18px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
+            Chat
+          </span>
+        )}
       </div>
 
       <div className="flex-grow overflow-y-auto px-[18px] py-4 flex flex-col gap-2.5">

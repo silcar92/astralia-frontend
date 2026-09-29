@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { relativeTime } from "@/lib/time";
 import type { CosmosPost } from "@/services/cosmosService";
 
@@ -27,7 +29,11 @@ export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLik
 
   return (
     <article className="rounded-[20px] p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }}>
-      <div className="flex gap-2.5 items-center">
+      <Link
+        href={post.is_mine ? "/profile" : `/people/${post.author}`}
+        aria-label={`Ver perfil de ${post.is_mine ? "ti" : post.author_name ?? "esta persona"}`}
+        className="flex gap-2.5 items-center"
+      >
         <div className="w-9 h-9 rounded-full shrink-0" style={{ background: "#2C2249", border: "1px solid #E8D9B5" }} />
         <div>
           <div className="text-[13px] font-bold" style={{ color: "var(--astralia-text)" }}>
@@ -38,7 +44,7 @@ export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLik
             {post.community_name ? ` · en ${post.community_name}` : ""}
           </div>
         </div>
-      </div>
+      </Link>
       <p className="text-[13px] leading-[1.5] my-2.5 whitespace-pre-wrap break-words" style={{ color: "#EFE9F7" }}>
         {post.text}
       </p>

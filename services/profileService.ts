@@ -42,3 +42,31 @@ export function updateBio(bio: string) {
     body: JSON.stringify({ bio }),
   });
 }
+
+export type ConnectionState = {
+  status: "none" | "pending_sent" | "pending_received" | "connected";
+  id: number | null;
+};
+
+export type PublicProfile =
+  | { is_me: true }
+  | {
+      is_me: false;
+      user_id: number;
+      name: string;
+      age: number;
+      city: string;
+      country: string;
+      bio: string;
+      interest_names: string[];
+      shared_interests: string[];
+      chart_highlights: { sun?: string; moon?: string; ascendant?: string };
+      cosmic_name: string | null;
+      compatibility_pct: number;
+      explanation: string;
+      connection: ConnectionState;
+    };
+
+export function fetchPublicProfile(userId: number): Promise<PublicProfile> {
+  return apiFetch(`/api/v1/accounts/profiles/${userId}/`);
+}

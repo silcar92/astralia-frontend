@@ -72,7 +72,18 @@ export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
 
       <g>
         {placed.map(({ star, x, y, scale, brightness }) => (
-          <g key={star.id}>
+          <g
+            key={star.id}
+            role="link"
+            tabIndex={0}
+            aria-label={`Ver perfil de ${star.name}`}
+            style={{ cursor: "pointer" }}
+            onClick={() => router.push(`/people/${star.other_user_id}`)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") router.push(`/people/${star.other_user_id}`);
+            }}
+          >
+            <circle cx={x} cy={y} r={Math.max(scale + 6, 16)} fill="transparent" />
             <use
               href="#star5"
               fill={starColor(brightness)}
