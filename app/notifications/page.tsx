@@ -1,10 +1,12 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/hooks/useAuth";
 import { relativeTime } from "@/lib/time";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { ApiError } from "@/services/apiClient";
 import * as connectionService from "@/services/connectionService";
 import * as notificationService from "@/services/notificationService";
@@ -50,10 +52,10 @@ const FALLBACK_ICON = (
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function groupOf(iso: string): "Hoy" | "Esta semana" | "Antes" {
+function groupOf(iso: string): "today" | "week" | "before" {
   const created = new Date(iso);
-  if (created.toDateString() === new Date().toDateString()) return "Hoy";
-  return Date.now() - created.getTime() < 7 * DAY_MS ? "Esta semana" : "Antes";
+  if (created.toDateString() === new Date().toDateString()) return "today";
+  return Date.now() - created.getTime() < 7 * DAY_MS ? "week" : "before";
 }
 
 function destinationOf(n: AppNotification): string | null {
@@ -69,6 +71,10 @@ function destinationOf(n: AppNotification): string | null {
 
 export default function NotificationsPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("notifications");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [items, setItems] = useState<AppNotification[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,13 +94,8 @@ export default function NotificationsPage() {
     notificationService
       .fetchNotifications()
       .then((res) => setItems(res.results))
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar tus notificaciones.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const handleOpen = (n: AppNotification) => {
@@ -116,10 +117,11 @@ export default function NotificationsPage() {
       // 404: la solicitud ya no está pendiente (ya aceptada o desconectada)
       const alreadyHandled = err instanceof ApiError && err.status === 404;
       setAccepted((prev) => {
-        const { [n.id]: _omit, ...rest } = prev;
+        const rest = { ...prev };
+        delete rest[n.id];
         return alreadyHandled ? { ...rest, [n.id]: "done" } : rest;
       });
-      if (!alreadyHandled) setError("No pudimos aceptar la solicitud. Intenta de nuevo.");
+      if (!alreadyHandled) setError(t("acceptFailed"));
     }
     if (!n.read_at) {
       await notificationService.markRead(n.id).catch(() => {});
@@ -134,8 +136,16 @@ export default function NotificationsPage() {
     setItems((prev) => prev?.map((i) => (i.read_at ? i : { ...i, read_at: now })) ?? null);
   };
 
-  const groups = (["Hoy", "Esta semana", "Antes"] as const)
-    .map((label) => ({ label, list: (items ?? []).filter((n) => groupOf(n.created_at) === label) }))
+  // el texto se arma en el idioma actual a partir de code + params; body (español) solo es respaldo
+  const messageOf = (n: AppNotification): string => {
+    if (!n.code || !t.has(`messages.${n.code}`)) return n.body;
+    const params = { ...n.params };
+    for (const key of ["name", "to"]) if (key in params && !params[key]) params[key] = tc("someone");
+    return t(`messages.${n.code}`, params);
+  };
+
+  const groups = (["today", "week", "before"] as const)
+    .map((key) => ({ key, list: (items ?? []).filter((n) => groupOf(n.created_at) === key) }))
     .filter((g) => g.list.length > 0);
 
   return (
@@ -144,7 +154,7 @@ export default function NotificationsPage() {
         <button
           type="button"
           onClick={() => router.back()}
-          aria-label="Volver"
+          aria-label={tc("back")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
         >
@@ -153,10 +163,10 @@ export default function NotificationsPage() {
           </svg>
         </button>
         <div className="text-[22px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Notificaciones
+          {t("title")}
         </div>
         <button type="button" onClick={handleMarkAll} className="text-[11px]" style={{ color: "#E8D9B5" }}>
-          Marcar todo
+          {t("markAll")}
         </button>
       </div>
 
@@ -168,21 +178,21 @@ export default function NotificationsPage() {
 
       {!error && items === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando tus notificaciones…
+          {t("loading")}
         </p>
       )}
 
       {!error && items !== null && items.length === 0 && (
         <p className="text-center text-sm mt-16 px-6" style={{ color: "var(--astralia-lilac)" }}>
-          No tienes notificaciones todavía. Aquí aparecerán tus conexiones y mensajes.
+          {t("empty")}
         </p>
       )}
 
       <div className="flex flex-col gap-5 mt-6">
         {groups.map((group) => (
-          <section key={group.label}>
+          <section key={group.key}>
             <div className="text-[10px] tracking-[1.5px] uppercase mb-2.5" style={{ color: "#B9A8DE" }}>
-              {group.label}
+              {t(`groups.${group.key}`)}
             </div>
             <div className="flex flex-col gap-2.5">
               {group.list.map((n) => {
@@ -214,10 +224,10 @@ export default function NotificationsPage() {
                       </div>
                       <div className="flex-grow">
                         <div className="text-[13px] leading-[1.4]" style={{ color: unread ? undefined : "#D9D5E8" }}>
-                          {n.body}
+                          {messageOf(n)}
                         </div>
                         <div className="text-[10px] mt-1" style={{ color: "#8E7FB0" }}>
-                          {relativeTime(n.created_at)}
+                          {relativeTime(n.created_at, locale)}
                         </div>
                       </div>
                       {unread && (
@@ -228,7 +238,7 @@ export default function NotificationsPage() {
                       <div className="px-3 pb-3 pl-[60px]">
                         {state === "ok" || state === "done" ? (
                           <span className="text-[11px]" style={{ color: "#E8D9B5" }}>
-                            {state === "ok" ? "Solicitud aceptada." : "Solicitud ya atendida."}
+                            {state === "ok" ? t("accepted") : t("handled")}
                           </span>
                         ) : (
                           <button
@@ -238,7 +248,7 @@ export default function NotificationsPage() {
                             className="text-[12px] font-semibold rounded-full px-4 py-1.5 disabled:opacity-60"
                             style={{ background: "var(--astralia-gold)", color: "#221A3B" }}
                           >
-                            Aceptar
+                            {t("accept")}
                           </button>
                         )}
                       </div>

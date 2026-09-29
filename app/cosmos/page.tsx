@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -10,7 +11,7 @@ import { StoriesRow } from "@/components/cosmos/StoriesRow";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
 import { usePostLikes } from "@/hooks/usePostLikes";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as cosmosService from "@/services/cosmosService";
 import type { CosmosPost } from "@/services/cosmosService";
 
@@ -18,6 +19,9 @@ type Composing = "post" | "story" | null;
 
 export default function CosmosPage() {
   const router = useRouter();
+  const t = useTranslations("cosmos");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [posts, setPosts] = useState<CosmosPost[] | null>(null);
   const [stories, setStories] = useState<CosmosPost[]>([]);
@@ -39,13 +43,8 @@ export default function CosmosPage() {
     cosmosService
       .fetchFeed()
       .then((res) => setPosts(res.results))
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar Cosmos.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const handlePublish = async (text: string) => {
@@ -64,7 +63,7 @@ export default function CosmosPage() {
     <main className="flex min-h-screen flex-col px-[22px] pt-[30px]" style={{ fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}>
       <div className="flex items-center justify-between">
         <div className="text-[26px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Cosmos
+          {t("title")}
         </div>
         <HeaderActions />
       </div>
@@ -77,7 +76,7 @@ export default function CosmosPage() {
         className="text-left text-[13px] rounded-[18px] px-4 py-3.5 backdrop-blur-md"
         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)", color: "var(--astralia-lilac)" }}
       >
-        ¿Qué quieres compartir con tu galaxia?
+        {t("prompt")}
       </button>
 
       {error && (
@@ -91,20 +90,20 @@ export default function CosmosPage() {
             className="text-xs rounded-full px-4 py-2"
             style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
           >
-            Reintentar
+            {tc("retry")}
           </button>
         </div>
       )}
 
       {!error && posts === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando Cosmos…
+          {t("loading")}
         </p>
       )}
 
       {!error && posts !== null && posts.length === 0 && (
         <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
-          Aún no hay publicaciones. Comparte la primera, o conecta con más personas para ver las suyas.
+          {t("empty")}
         </p>
       )}
 
@@ -120,8 +119,8 @@ export default function CosmosPage() {
 
       {composing && (
         <ComposeSheet
-          title={composing === "story" ? "Nueva historia" : "Nueva publicación"}
-          placeholder={composing === "story" ? "Tu historia dura 24 horas…" : "Comparte algo con tu galaxia…"}
+          title={composing === "story" ? t("newStory") : t("newPost")}
+          placeholder={composing === "story" ? t("storyPlaceholder") : t("postPlaceholder")}
           onClose={() => setComposing(null)}
           onSubmit={handlePublish}
         />

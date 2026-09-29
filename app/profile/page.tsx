@@ -1,33 +1,34 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { BottomNav } from "@/components/BottomNav";
 import { BackButton } from "@/components/ui/BackButton";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useCatalog } from "@/hooks/useCatalog";
 import { useAuth } from "@/hooks/useAuth";
 import * as astrologyService from "@/services/astrologyService";
 import type { NatalChart } from "@/services/astrologyService";
 import * as galaxyService from "@/services/galaxyService";
 import * as personalityService from "@/services/personalityService";
 import type { PersonalityResult } from "@/services/personalityService";
-import * as profileService from "@/services/profileService";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { status, profile, logout, refreshProfile } = useAuth();
+  const t = useTranslations("profile");
+  const catalog = useCatalog();
+  const { status, profile, logout } = useAuth();
   const [chart, setChart] = useState<NatalChart | null>(null);
   const [personality, setPersonality] = useState<PersonalityResult | null>(null);
   const [galaxyCount, setGalaxyCount] = useState<number | null>(null);
   const [newThisWeek, setNewThisWeek] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [bioDraft, setBioDraft] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -57,26 +58,6 @@ export default function ProfilePage() {
   const moon = chart ? astrologyService.findPlacement(chart, "moon")?.sign : undefined;
   const ascendant = chart ? astrologyService.findPlacement(chart, "ascendant")?.sign : undefined;
 
-  const startEditing = () => {
-    setBioDraft(profile?.bio ?? "");
-    setSaveError(null);
-    setEditing(true);
-  };
-
-  const saveBio = async () => {
-    setSaving(true);
-    setSaveError(null);
-    try {
-      await profileService.updateBio(bioDraft.trim());
-      await refreshProfile();
-      setEditing(false);
-    } catch {
-      setSaveError("No pudimos guardar tu bio. Intenta de nuevo.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleLogout = () => {
     logout();
     router.replace("/login");
@@ -85,7 +66,7 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <main className="flex min-h-screen items-center justify-center" style={{ color: "var(--astralia-lilac)" }}>
-        <p className="text-sm">Cargando tu perfil…</p>
+        <p className="text-sm">{t("loading")}</p>
       </main>
     );
   }
@@ -95,12 +76,12 @@ export default function ProfilePage() {
       <div className="flex items-center justify-between relative">
         <BackButton fallback="/galaxy" />
         <div className="text-[19px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Mi Perfil
+          {t("title")}
         </div>
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
-          aria-label="Ajustes"
+          aria-label={t("settings")}
           aria-expanded={menuOpen}
           className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(232,217,181,0.35)", color: "#E8D9B5" }}
@@ -115,8 +96,11 @@ export default function ProfilePage() {
             className="absolute right-0 top-[38px] z-10 rounded-2xl p-1.5 backdrop-blur-md"
             style={{ background: "rgba(34,26,59,0.95)", border: "1px solid rgba(232,217,181,0.35)" }}
           >
+            <div className="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
             <button type="button" onClick={handleLogout} className="text-[13px] px-4 py-2 rounded-xl w-full text-left" style={{ color: "#F3E9C8" }}>
-              Cerrar sesión
+              {t("logout")}
             </button>
           </div>
         )}
@@ -133,7 +117,7 @@ export default function ProfilePage() {
           </svg>
         </div>
         <div className="text-[19px] font-semibold mt-2.5" style={{ fontFamily: "var(--font-serif)" }}>
-          {profile.name || "Sin nombre"}, {profile.age}
+          {profile.name || t("noName")}, {profile.age}
         </div>
         <div className="text-[11px] mt-0.5" style={{ color: "#B9A8DE" }}>
           {profile.city}, {profile.country}
@@ -145,8 +129,8 @@ export default function ProfilePage() {
       </div>
 
       <p className="text-[9px] leading-[1.4] text-center mt-2 mb-1 px-3" style={{ color: "#8E7FB0" }}>
-  La astrología en Astralia es una herramienta de autoconocimiento y compatibilidad, no una predicción.
-</p>
+        {t("disclaimer")}
+      </p>
 
       {personality && (
         <div
@@ -159,38 +143,19 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {editing ? (
-        <div className="flex flex-col gap-2 mt-1">
-          <textarea
-            value={bioDraft}
-            onChange={(e) => setBioDraft(e.target.value)}
-            maxLength={280}
-            rows={3}
-            placeholder="Cuéntales a los demás qué tipo de amistades buscas…"
-            className="rounded-2xl px-4 py-3 text-sm outline-none resize-none"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "var(--astralia-text)" }}
-          />
-          {saveError && (
-            <span className="text-xs" style={{ color: "var(--astralia-alert)" }}>
-              {saveError}
-            </span>
-          )}
-        </div>
-      ) : (
-        <p className="text-xs leading-[1.4] text-center px-1.5" style={{ color: profile.bio ? "#EFE9F7" : "#8E7FB0" }}>
-          {profile.bio || "Aún no has escrito tu bio."}
-        </p>
-      )}
+      <p className="text-xs leading-[1.4] text-center px-1.5" style={{ color: profile.bio ? "#EFE9F7" : "#8E7FB0" }}>
+        {profile.bio || t("noBio")}
+      </p>
 
-      {profile.interest_names.length > 0 && (
+      {profile.interest_items.length > 0 && (
         <div className="flex gap-2 justify-center flex-wrap mt-3 mb-3.5">
-          {profile.interest_names.map((name) => (
+          {profile.interest_items.map((item) => (
             <span
-              key={name}
+              key={item.code}
               className="text-[10px] rounded-full px-3 py-[5px]"
               style={{ background: "rgba(232,217,181,0.18)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
             >
-              {name}
+              {catalog.interest(item)}
             </span>
           ))}
         </div>
@@ -202,7 +167,7 @@ export default function ProfilePage() {
             {galaxyCount ?? "—"}
           </div>
           <div className="text-[8px] uppercase tracking-[0.5px] mt-0.5" style={{ color: "#B9A8DE" }}>
-            En tu galaxia
+            {t("inGalaxy")}
           </div>
         </div>
         <div className="flex-1 text-center" style={{ borderLeft: "1px solid rgba(255,255,255,0.12)" }}>
@@ -210,42 +175,18 @@ export default function ProfilePage() {
             {newThisWeek ?? "—"}
           </div>
           <div className="text-[8px] uppercase tracking-[0.5px] mt-0.5" style={{ color: "#B9A8DE" }}>
-            Nuevas esta semana
+            {t("newThisWeek")}
           </div>
         </div>
       </div>
 
-      {editing ? (
-        <div className="flex gap-2.5">
-          <button
-            type="button"
-            onClick={() => setEditing(false)}
-            disabled={saving}
-            className="flex-1 py-3 rounded-full text-[13px] font-semibold"
-            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)" }}
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            onClick={saveBio}
-            disabled={saving}
-            className="flex-1 py-3 rounded-full text-[13px] font-bold disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
-          >
-            {saving ? "Guardando…" : "Guardar"}
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={startEditing}
-          className="py-3 rounded-full text-[13px] font-bold"
-          style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
-        >
-          Editar perfil
-        </button>
-      )}
+      <Link
+        href="/profile/edit"
+        className="py-3 rounded-full text-[13px] font-bold text-center"
+        style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
+      >
+        {t("edit")}
+      </Link>
 
       <BottomNav active="/galaxy" />
     </main>

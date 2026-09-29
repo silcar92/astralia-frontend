@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,12 +8,15 @@ import { BottomNav } from "@/components/BottomNav";
 import { StormCard } from "@/components/discover/StormCard";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as discoveryService from "@/services/discoveryService";
 import type { SuggestionCard } from "@/services/discoveryService";
 
 export default function CosmicStormPage() {
   const router = useRouter();
+  const t = useTranslations("discover");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [queue, setQueue] = useState<SuggestionCard[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,13 +26,8 @@ export default function CosmicStormPage() {
     discoveryService
       .fetchStormSuggestions()
       .then((res) => setQueue(res.results.filter((s) => s.action === "pending")))
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al buscar personas.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function CosmicStormPage() {
       setQueue(rest.length === 0 ? null : rest);
       if (rest.length === 0) loadBatch();
     } catch {
-      setError("No pudimos registrar tu decisión. Intenta de nuevo.");
+      setError(t("decideFailed"));
     } finally {
       setDeciding(false);
     }
@@ -66,7 +65,7 @@ export default function CosmicStormPage() {
     <main className="flex min-h-screen flex-col px-[22px] pt-8" style={{ fontFamily: "var(--font-sans)" }}>
       <div className="flex items-center justify-between">
         <span className="text-[11px] tracking-[2px] uppercase" style={{ color: "var(--astralia-lilac)" }}>
-          Descubrimiento ilimitado
+          {t("storm.eyebrow")}
         </span>
         <HeaderActions />
       </div>
@@ -78,7 +77,7 @@ export default function CosmicStormPage() {
         Cosmic Storm
       </h1>
       <p className="text-[11px] text-center mb-5" style={{ color: "var(--astralia-lilac)" }}>
-        Más allá de tu rango habitual de compatibilidad
+        {t("storm.subtitle")}
       </p>
 
       {error && (
@@ -92,21 +91,21 @@ export default function CosmicStormPage() {
             className="text-xs rounded-full px-4 py-2"
             style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
           >
-            Reintentar
+            {tc("retry")}
           </button>
         </div>
       )}
 
       {!error && queue === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Buscando personas en el cosmos…
+          {t("storm.loading")}
         </p>
       )}
 
       {!error && queue !== null && !current && (
         <div className="flex-grow flex items-center justify-center text-center px-6">
           <p className="text-sm" style={{ color: "var(--astralia-lilac)" }}>
-            Por ahora no hay más personas por descubrir. Vuelve más tarde, a medida que se sumen nuevos perfiles.
+            {t("storm.empty")}
           </p>
         </div>
       )}
@@ -119,7 +118,7 @@ export default function CosmicStormPage() {
               type="button"
               onClick={() => decide("passed")}
               disabled={deciding}
-              aria-label="Pasar"
+              aria-label={t("pass")}
               className="w-14 h-14 rounded-full flex items-center justify-center disabled:opacity-50"
               style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.3)", color: "#EFE9F7" }}
             >
@@ -131,7 +130,7 @@ export default function CosmicStormPage() {
               type="button"
               onClick={() => decide("connected")}
               disabled={deciding}
-              aria-label="Conectar"
+              aria-label={t("connect")}
               className="w-14 h-14 rounded-full flex items-center justify-center disabled:opacity-50"
               style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D", boxShadow: "0 0 18px rgba(232,217,181,0.4)" }}
             >

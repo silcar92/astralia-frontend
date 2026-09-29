@@ -1,0 +1,10 @@
+{
+ "title": "My Galaxy",
+ "loading": "Loading your galaxy…",
+ "empty": "You don't have any stars in your galaxy yet. Connect with someone in Discover or Cosmic Storm and they'll appear here.",
+ "footer": "The size of your galaxy doesn't define your worth.",
+ "loadFailed": "We couldn't load your galaxy.",
+ "viewProfileOf": "View {name}'s profile",
+ "viewMine": "View my profile",
+ "you": "You"
+}

@@ -1,0 +1,83 @@
+{
+ "signs": {
+  "aries": "Aries",
+  "taurus": "Tauro",
+  "gemini": "Géminis",
+  "cancer": "Cáncer",
+  "leo": "Leo",
+  "virgo": "Virgo",
+  "libra": "Libra",
+  "scorpio": "Escorpio",
+  "sagittarius": "Sagitario",
+  "capricorn": "Capricornio",
+  "aquarius": "Acuario",
+  "pisces": "Piscis"
+ },
+ "interests": {
+  "movies": "Películas",
+  "series": "Series",
+  "streaming": "Streaming",
+  "music": "Música",
+  "books": "Libros",
+  "fitness": "Fitness",
+  "travel": "Viajes",
+  "food": "Comida",
+  "fashion": "Moda",
+  "art": "Arte",
+  "sports": "Deportes",
+  "videogames": "Videojuegos",
+  "crafts": "Manualidades",
+  "dance": "Baile",
+  "photography": "Fotografía",
+  "cooking": "Cocina",
+  "writing": "Escritura",
+  "livestreaming": "Streaming en vivo"
+ },
+ "goals": {
+  "best_friend": "Mejor amigo/a",
+  "casual_friend": "Amistad casual",
+  "activity_buddy": "Compañero de actividades",
+  "travel_friend": "Amigo de viajes",
+  "creative_friend": "Amigo creativo",
+  "intellectual_friend": "Amigo intelectual",
+  "workout_friend": "Compañero de ejercicio",
+  "parent_friend": "Amigo padre/madre",
+  "local_social_group": "Grupo social local",
+  "online_friend": "Amigo en línea",
+  "other": "Otro"
+ },
+ "depth": {
+  "shallow": "Ligera",
+  "moderate": "Moderada",
+  "deep": "Profunda"
+ },
+ "group": {
+  "one_on_one": "Uno a uno",
+  "small_group": "Grupo pequeño",
+  "large_group": "Grupo grande"
+ },
+ "bodies": {
+  "sun": "Sol",
+  "moon": "Luna",
+  "ascendant": "Asc."
+ },
+ "dimension": {
+  "astrology": "sus cartas indican una conexión fuerte",
+  "personality": "su forma de ser encaja bien",
+  "interests": "comparten varios intereses",
+  "lifestyle": "tienen un ritmo de vida parecido",
+  "social_preferences": "buscan el mismo tipo de conversación",
+  "friendship_goals": "buscan el mismo tipo de amistad",
+  "geo_proximity": "están cerca geográficamente"
+ },
+ "explanation": {
+  "withInterests": "Comparten interés en {interests}, y {phrase}.",
+  "withoutInterests": "{phrase}"
+ },
+ "tiers": {
+  "free": "Free",
+  "cosmic": "Cosmic",
+  "nebula": "Nebula"
+ },
+ "noChart": "La carta natal todavía no está disponible."
+}

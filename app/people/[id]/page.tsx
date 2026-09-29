@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -8,6 +9,8 @@ import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { BottomNav } from "@/components/BottomNav";
 import { BackButton } from "@/components/ui/BackButton";
 import { useAuth } from "@/hooks/useAuth";
+import { useCatalog } from "@/hooks/useCatalog";
+import { useExplanation } from "@/lib/explanation";
 import { ApiError } from "@/services/apiClient";
 import * as connectionService from "@/services/connectionService";
 import * as profileService from "@/services/profileService";
@@ -19,6 +22,9 @@ export default function PersonProfilePage() {
   const params = useParams<{ id: string }>();
   const userId = Number(params.id);
   const router = useRouter();
+  const t = useTranslations("people");
+  const catalog = useCatalog();
+  const explain = useExplanation();
   const { status } = useAuth();
   const [person, setPerson] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +48,8 @@ export default function PersonProfilePage() {
         if (res.is_me) router.replace("/profile");
         else setPerson(res);
       })
-      .catch((err) => {
-        setError(
-          err instanceof ApiError && err.status === 404
-            ? "Este perfil no está disponible. Solo puedes ver a personas conectadas contigo o de tus comunidades."
-            : "No pudimos cargar el perfil. Intenta de nuevo."
-        );
-      });
+      .catch((err) => setError(err instanceof ApiError && err.status === 404 ? t("unavailable") : t("loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router, userId]);
 
   const setConnection = (connection: ConnectionState) => setPerson((p) => (p ? { ...p, connection } : p));
@@ -60,7 +61,7 @@ export default function PersonProfilePage() {
       const res = await connectionService.requestConnection(person.user_id);
       setConnection({ status: res.status === "connected" ? "connected" : "pending_sent", id: res.id });
     } catch {
-      setError("No pudimos enviar la solicitud. Intenta de nuevo.");
+      setError(t("connectFailed"));
     } finally {
       setBusy(false);
     }
@@ -73,7 +74,7 @@ export default function PersonProfilePage() {
       await connectionService.acceptConnection(person.connection.id);
       setConnection({ status: "connected", id: person.connection.id });
     } catch {
-      setError("No pudimos aceptar la solicitud. Intenta de nuevo.");
+      setError(t("acceptFailed"));
     } finally {
       setBusy(false);
     }
@@ -86,7 +87,7 @@ export default function PersonProfilePage() {
       <div className="flex items-center justify-between">
         <BackButton fallback="/galaxy" />
         <div className="text-[19px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Perfil
+          {t("title")}
         </div>
         <span className="w-[30px]" />
       </div>
@@ -99,7 +100,7 @@ export default function PersonProfilePage() {
 
       {!error && !person && (
         <p className="text-center text-sm mt-12" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando perfil…
+          {t("loading")}
         </p>
       )}
 
@@ -132,8 +133,8 @@ export default function PersonProfilePage() {
           </div>
 
           <p className="text-[9px] leading-[1.4] text-center mt-2 mb-1 px-3" style={{ color: "#8E7FB0" }}>
-  La astrología en Astralia es una herramienta de autoconocimiento y compatibilidad, no una predicción.
-</p>
+            {t("disclaimer")}
+          </p>
 
           {person.cosmic_name && (
             <div
@@ -155,11 +156,11 @@ export default function PersonProfilePage() {
                 {person.compatibility_pct}%
               </span>
               <span className="text-[10px] uppercase tracking-[0.5px]" style={{ color: "#D9C9F0" }}>
-                afinidad contigo
+                {t("affinity")}
               </span>
             </div>
             <p className="text-[12px] text-center leading-[1.5] px-3" style={{ color: "#EFE9F7" }}>
-              {person.explanation}
+              {explain(person.explanation_data, person.explanation)}
             </p>
           </div>
 
@@ -169,13 +170,13 @@ export default function PersonProfilePage() {
             </p>
           )}
 
-          {person.interest_names.length > 0 && (
+          {person.interest_items.length > 0 && (
             <div className="flex gap-2 justify-center flex-wrap mt-3.5 mb-4">
-              {person.interest_names.map((name) => {
-                const shared = person.shared_interests.includes(name);
+              {person.interest_items.map((interest) => {
+                const shared = person.shared_interests.some((s) => s.code === interest.code);
                 return (
                   <span
-                    key={name}
+                    key={interest.code}
                     className="text-[10px] rounded-full px-3 py-[5px]"
                     style={{
                       background: shared ? "rgba(232,217,181,0.28)" : "rgba(255,255,255,0.06)",
@@ -183,7 +184,7 @@ export default function PersonProfilePage() {
                       color: shared ? "#F3E9C8" : "#D9C9F0",
                     }}
                   >
-                    {name}
+                    {catalog.interest(interest)}
                   </span>
                 );
               })}
@@ -193,22 +194,22 @@ export default function PersonProfilePage() {
           <div className="mt-2 flex flex-col gap-2">
             {person.connection.status === "connected" && person.connection.id && (
               <Link href={`/chats/${person.connection.id}`} className="text-center py-3 rounded-full text-[13px] font-bold" style={goldButton}>
-                Enviar mensaje
+                {t("message")}
               </Link>
             )}
             {person.connection.status === "none" && (
               <button type="button" onClick={handleConnect} disabled={busy} className="py-3 rounded-full text-[13px] font-bold disabled:opacity-60" style={goldButton}>
-                Conectar
+                {t("connect")}
               </button>
             )}
             {person.connection.status === "pending_sent" && (
               <span className="text-center py-3 rounded-full text-[13px]" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "#B9A8DE" }}>
-                Solicitud enviada
+                {t("requestSent")}
               </span>
             )}
             {person.connection.status === "pending_received" && (
               <button type="button" onClick={handleAccept} disabled={busy} className="py-3 rounded-full text-[13px] font-bold disabled:opacity-60" style={goldButton}>
-                Aceptar solicitud
+                {t("acceptRequest")}
               </button>
             )}
           </div>

@@ -1,9 +1,3 @@
-export const SIGN_LABELS: Record<string, string> = {
-  aries: "Aries", taurus: "Tauro", gemini: "Géminis", cancer: "Cáncer", leo: "Leo", virgo: "Virgo",
-  libra: "Libra", scorpio: "Escorpio", sagittarius: "Sagitario", capricorn: "Capricornio",
-  aquarius: "Acuario", pisces: "Piscis",
-};
-
 export function SunGlyph() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">

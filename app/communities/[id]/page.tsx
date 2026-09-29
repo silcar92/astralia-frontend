@@ -1,11 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
-import { CommunityBanner, memberLabel } from "@/components/communities/CommunityBanner";
+import { CommunityBanner, useMemberLabel } from "@/components/communities/CommunityBanner";
 import { CreatorExitSheet } from "@/components/communities/CreatorExitSheet";
 import { JoinButton } from "@/components/communities/JoinButton";
 import { MembersSection } from "@/components/communities/MembersSection";
@@ -24,6 +25,9 @@ export default function CommunityDetailPage() {
   const params = useParams<{ id: string }>();
   const communityId = Number(params.id);
   const router = useRouter();
+  const t = useTranslations("communities.detail");
+  const tb = useTranslations("communities");
+  const memberLabel = useMemberLabel();
   const { status } = useAuth();
 
   const [community, setCommunity] = useState<Community | null>(null);
@@ -52,12 +56,9 @@ export default function CommunityDetailPage() {
       .fetchCommunity(communityId)
       .then(setCommunity)
       .catch((err) => {
-        setError(
-          err instanceof ApiError && err.status === 404
-            ? "Esta comunidad no existe o no está disponible para ti."
-            : "No pudimos cargar la comunidad. Intenta de nuevo."
-        );
+        setError(err instanceof ApiError && err.status === 404 ? t("notFound") : t("loadFailed"));
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router, communityId]);
 
   useEffect(() => {
@@ -79,20 +80,20 @@ export default function CommunityDetailPage() {
         member_count: res.status === "approved" ? community.member_count + 1 : community.member_count,
       });
     } catch {
-      setError("No pudimos procesar tu solicitud. Intenta de nuevo.");
+      setError(tb("joinFailed"));
     } finally {
       setBusy(false);
     }
   };
 
   const handleLeave = async () => {
-    if (!community || !window.confirm(`¿Salir de ${community.name}?`)) return;
+    if (!community || !window.confirm(t("confirmLeave", { name: community.name }))) return;
     setBusy(true);
     try {
       await communityService.leaveCommunity(community.id);
       setCommunity({ ...community, my_status: null, member_count: Math.max(0, community.member_count - 1) });
     } catch {
-      setError("No pudimos procesar tu salida. Intenta de nuevo.");
+      setError(t("leaveFailed"));
     } finally {
       setBusy(false);
     }
@@ -108,7 +109,7 @@ export default function CommunityDetailPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/communities"
-          aria-label="Volver a comunidades"
+          aria-label={tb("back")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
         >
@@ -117,7 +118,7 @@ export default function CommunityDetailPage() {
           </svg>
         </Link>
         <span className="text-[18px] font-semibold italic truncate" style={{ fontFamily: "var(--font-serif)" }}>
-          {community?.name ?? "Comunidad"}
+          {community?.name ?? t("fallbackTitle")}
         </span>
       </div>
 
@@ -129,7 +130,7 @@ export default function CommunityDetailPage() {
 
       {!error && !community && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando comunidad…
+          {t("loading")}
         </p>
       )}
 
@@ -147,7 +148,7 @@ export default function CommunityDetailPage() {
                 </div>
                 {community.closed_at ? (
                   <span className="px-4 py-2 rounded-full text-[11px] font-bold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)" }}>
-                    Cerrada
+                    {tb("closed")}
                   </span>
                 ) : (
                   <JoinButton community={community} busy={busy} onJoin={handleJoin} />
@@ -163,7 +164,7 @@ export default function CommunityDetailPage() {
 
           {community.closed_at && (
             <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
-              Esta comunidad fue cerrada por su creador y ya no está disponible.
+              {t("closedBanner")}
             </p>
           )}
 
@@ -174,7 +175,7 @@ export default function CommunityDetailPage() {
                 className="mt-4 text-center text-xs font-semibold rounded-full py-2.5"
                 style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
               >
-                Organizar un evento de la comunidad
+                {t("organizeEvent")}
               </Link>
               {(community.pending_count ?? 0) > 0 && (
                 <MembershipRequests
@@ -205,17 +206,17 @@ export default function CommunityDetailPage() {
                 className="text-left text-[13px] rounded-[18px] px-4 py-3.5 mt-5 backdrop-blur-md"
                 style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)", color: "var(--astralia-lilac)" }}
               >
-                Comparte algo con la comunidad…
+                {t("sharePrompt")}
               </button>
 
               {posts === null && (
                 <p className="text-center text-sm mt-8" style={{ color: "var(--astralia-lilac)" }}>
-                  Cargando publicaciones…
+                  {t("loadingPosts")}
                 </p>
               )}
               {posts !== null && posts.length === 0 && (
                 <p className="text-center text-sm mt-8 px-6" style={{ color: "var(--astralia-lilac)" }}>
-                  Todavía no hay publicaciones. Escribe la primera.
+                  {t("noPosts")}
                 </p>
               )}
               {posts !== null && posts.length > 0 && (
@@ -233,14 +234,14 @@ export default function CommunityDetailPage() {
                 className="text-[11px] underline underline-offset-2 mt-8 self-center"
                 style={{ color: "#8E7FB0" }}
               >
-                {community.is_creator ? "Dejar la comunidad…" : "Salir de la comunidad"}
+                {community.is_creator ? t("leaveAsCreator") : t("leave")}
               </button>
             </>
           ) : community.closed_at ? null : (
             <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
               {community.my_status === "pending"
-                ? "Tu solicitud está pendiente. Te avisaremos cuando te aprueben."
-                : "Únete para ver y compartir publicaciones de esta comunidad."}
+                ? t("pendingNote")
+                : t("joinNote")}
             </p>
           )}
         </>
@@ -254,8 +255,8 @@ export default function CommunityDetailPage() {
 
       {composing && (
         <ComposeSheet
-          title="Nueva publicación"
-          placeholder="Comparte algo con la comunidad…"
+          title={t("newPost")}
+          placeholder={t("sharePrompt")}
           onClose={() => setComposing(false)}
           onSubmit={handlePublish}
         />

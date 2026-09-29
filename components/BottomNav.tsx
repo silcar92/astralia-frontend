@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 function CosmosIcon() {
@@ -48,14 +49,16 @@ function GalaxyIcon() {
 }
 
 const ITEMS = [
-  { href: "/cosmos", label: "COSMOS", Icon: CosmosIcon },
-  { href: "/discover", label: "DISCOVER", Icon: DiscoverIcon },
-  { href: "/cosmic-storm", label: "STORM", Icon: StormIcon },
-  { href: "/communities", label: "COMUNIDAD", Icon: CommunityIcon },
-  { href: "/galaxy", label: "GALAXIA", Icon: GalaxyIcon },
+  { href: "/cosmos", label: "cosmos", Icon: CosmosIcon },
+  { href: "/discover", label: "discover", Icon: DiscoverIcon },
+  { href: "/cosmic-storm", label: "storm", Icon: StormIcon },
+  { href: "/communities", label: "community", Icon: CommunityIcon },
+  { href: "/galaxy", label: "galaxy", Icon: GalaxyIcon },
 ];
 
 export function BottomNav({ active }: { active: string }) {
+  const t = useTranslations("nav");
+
   return (
     <div className="flex justify-around pt-4 pb-5 mt-auto">
       {ITEMS.map(({ href, label, Icon }) => {
@@ -68,7 +71,7 @@ export function BottomNav({ active }: { active: string }) {
             style={{ color: isActive ? "#F3E9C8" : "#8E7FB0" }}
           >
             <Icon />
-            <span className="text-[9px] tracking-wide">{label}</span>
+            <span className="text-[9px] tracking-wide">{t(label)}</span>
           </Link>
         );
       })}

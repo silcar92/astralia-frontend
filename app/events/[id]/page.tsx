@@ -1,12 +1,14 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
 import { RsvpButton } from "@/components/events/RsvpButton";
-import { attendeeLabel, eventDateParts, eventWhen } from "@/lib/events";
+import { eventDateParts, eventWhen, useAttendeeLabel } from "@/lib/events";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { ApiError } from "@/services/apiClient";
 import * as eventService from "@/services/eventService";
@@ -29,6 +31,11 @@ export default function EventDetailPage() {
   const params = useParams<{ id: string }>();
   const eventId = Number(params.id);
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("events.detail");
+  const te = useTranslations("events");
+  const attendeeLabel = useAttendeeLabel();
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [event, setEvent] = useState<AstraliaEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +57,8 @@ export default function EventDetailPage() {
     eventService
       .fetchEvent(eventId)
       .then(setEvent)
-      .catch((err) => {
-        setError(
-          err instanceof ApiError && err.status === 404
-            ? "Este evento no existe o no está disponible para ti."
-            : "No pudimos cargar el evento. Intenta de nuevo."
-        );
-      });
+      .catch((err) => setError(err instanceof ApiError && err.status === 404 ? t("notFound") : t("loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router, eventId]);
 
   const reload = () => eventService.fetchEvent(eventId).then(setEvent).catch(() => {});
@@ -68,7 +70,7 @@ export default function EventDetailPage() {
       await eventService.rsvp(eventId);
       await reload();
     } catch (err) {
-      setNotice(err instanceof ApiError ? (err.body as { detail?: string })?.detail ?? "No pudimos registrar tu asistencia." : "No pudimos registrar tu asistencia.");
+      setNotice(errorMessage(err, "rsvpFailed"));
     } finally {
       setBusy(false);
     }
@@ -81,25 +83,25 @@ export default function EventDetailPage() {
       await eventService.cancelRsvp(eventId);
       await reload();
     } catch {
-      setNotice("No pudimos cancelar tu asistencia. Intenta de nuevo.");
+      setNotice(t("cancelRsvpFailed"));
     } finally {
       setBusy(false);
     }
   };
 
   const handleCancelEvent = async () => {
-    if (!event || !window.confirm(`¿Cancelar "${event.title}"? Se avisará a quienes se habían anotado.`)) return;
+    if (!event || !window.confirm(t("confirmCancelEvent", { title: event.title }))) return;
     setBusy(true);
     try {
       await eventService.cancelEvent(eventId);
       router.replace("/events");
     } catch {
-      setNotice("No pudimos cancelar el evento. Intenta de nuevo.");
+      setNotice(t("cancelEventFailed"));
       setBusy(false);
     }
   };
 
-  const { month, day } = event ? eventDateParts(event.starts_at) : { month: "", day: "" };
+  const { month, day } = event ? eventDateParts(event.starts_at, locale) : { month: "", day: "" };
   const attending = event?.my_status === "going" || event?.my_status === "waitlisted";
 
   return (
@@ -107,7 +109,7 @@ export default function EventDetailPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/events"
-          aria-label="Volver a eventos"
+          aria-label={te("backToEvents")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
         >
@@ -116,7 +118,7 @@ export default function EventDetailPage() {
           </svg>
         </Link>
         <span className="text-[18px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Evento
+          {t("title")}
         </span>
       </div>
 
@@ -127,7 +129,7 @@ export default function EventDetailPage() {
       )}
       {!error && !event && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando evento…
+          {t("loading")}
         </p>
       )}
 
@@ -154,20 +156,18 @@ export default function EventDetailPage() {
             className="mt-5 rounded-[20px] p-4 flex flex-col gap-3.5"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)" }}
           >
-            <Row label="Cuándo">{eventWhen(event)}</Row>
-            <Row label={event.format === "online" ? "Dónde · en línea" : "Dónde · presencial"}>
+            <Row label={t("when")}>{eventWhen(event, locale)}</Row>
+            <Row label={event.format === "online" ? t("whereOnline") : t("whereInPerson")}>
               {event.location ||
-                (event.format === "in_person"
-                  ? "La dirección se revela cuando confirmes tu asistencia."
-                  : "El enlace se comparte con quienes confirmen.")}
+                (event.format === "in_person" ? t("addressHidden") : t("linkHidden"))}
             </Row>
-            <Row label="Organiza">
+            <Row label={t("organizer")}>
               {event.organizer_name}
               {event.community_name ? ` · ${event.community_name}` : ""}
             </Row>
-            <Row label="Asistentes">
+            <Row label={t("attendeesLabel")}>
               {attendeeLabel(event)}
-              {event.is_full ? " · Cupo lleno, hay lista de espera" : ""}
+              {event.is_full ? ` · ${t("fullNote")}` : ""}
             </Row>
           </div>
 
@@ -182,8 +182,8 @@ export default function EventDetailPage() {
               className="text-[11px] leading-[1.5] mt-5 rounded-2xl p-3.5"
               style={{ background: "rgba(232,217,181,0.08)", border: "1px solid rgba(232,217,181,0.25)", color: "#D9C9F0" }}
             >
-              Seguridad: reúnete en un lugar público, avisa a alguien de confianza a dónde vas y reporta cualquier conducta que te incomode.
-              {event.requires_verification ? " Este evento solo admite personas con identidad verificada." : ""}
+              {t("safety")}
+              {event.requires_verification ? ` ${t("verifiedOnly")}` : ""}
             </p>
           )}
 
@@ -197,12 +197,12 @@ export default function EventDetailPage() {
             <RsvpButton event={event} busy={busy} onRsvp={handleRsvp} />
             {attending && !event.is_organizer && (
               <button type="button" onClick={handleCancelRsvp} disabled={busy} className="text-[11px] underline underline-offset-2" style={{ color: "#8E7FB0" }}>
-                Cancelar mi asistencia
+                {t("cancelRsvp")}
               </button>
             )}
             {event.is_organizer && (
               <button type="button" onClick={handleCancelEvent} disabled={busy} className="text-[11px] underline underline-offset-2" style={{ color: "var(--astralia-alert)" }}>
-                Cancelar el evento
+                {t("cancelEvent")}
               </button>
             )}
           </div>

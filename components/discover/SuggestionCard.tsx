@@ -1,5 +1,11 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { GoldButton } from "@/components/ui/GoldButton";
+import { useCatalog } from "@/hooks/useCatalog";
+import { useExplanation } from "@/lib/explanation";
 import type { SuggestionCard as SuggestionCardType } from "@/services/discoveryService";
 
 export function SuggestionCard({
@@ -13,6 +19,9 @@ export function SuggestionCard({
   onPass: () => void;
   loading: boolean;
 }) {
+  const t = useTranslations("discover");
+  const catalog = useCatalog();
+  const explain = useExplanation();
   const score = Math.round(parseFloat(suggestion.compatibility_score));
 
   return (
@@ -63,24 +72,24 @@ export function SuggestionCard({
             {score}%
           </span>
           <span className="text-[9px] tracking-wide uppercase" style={{ color: "var(--astralia-lilac-soft)" }}>
-            afinidad
+            {t("affinity")}
           </span>
         </div>
       </div>
 
       <p className="text-[13px] px-2" style={{ color: "var(--astralia-text)" }}>
-        {suggestion.explanation}
+        {explain(suggestion.explanation_data, suggestion.explanation)}
       </p>
 
       {suggestion.shared_interests.length > 0 && (
         <div className="flex gap-2 justify-center flex-wrap mt-5 mb-5">
           {suggestion.shared_interests.map((interest) => (
             <span
-              key={interest}
+              key={interest.code}
               className="text-[11px] rounded-full px-3.5 py-1.5"
               style={{ background: "rgba(232,217,181,0.18)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
             >
-              {interest}
+              {catalog.interest(interest)}
             </span>
           ))}
         </div>
@@ -91,7 +100,7 @@ export function SuggestionCard({
           type="button"
           onClick={onPass}
           disabled={loading}
-          aria-label="Pasar"
+          aria-label={t("pass")}
           className="w-[52px] rounded-full flex items-center justify-center disabled:opacity-50"
           style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)", color: "var(--astralia-text)" }}
         >
@@ -100,7 +109,7 @@ export function SuggestionCard({
           </svg>
         </button>
         <GoldButton type="button" onClick={onConnect} disabled={loading} className="flex-1">
-          Conectar
+          {t("connect")}
         </GoldButton>
       </div>
     </div>

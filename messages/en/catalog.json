@@ -1,0 +1,83 @@
+{
+ "signs": {
+  "aries": "Aries",
+  "taurus": "Taurus",
+  "gemini": "Gemini",
+  "cancer": "Cancer",
+  "leo": "Leo",
+  "virgo": "Virgo",
+  "libra": "Libra",
+  "scorpio": "Scorpio",
+  "sagittarius": "Sagittarius",
+  "capricorn": "Capricorn",
+  "aquarius": "Aquarius",
+  "pisces": "Pisces"
+ },
+ "interests": {
+  "movies": "Movies",
+  "series": "TV series",
+  "streaming": "Streaming",
+  "music": "Music",
+  "books": "Books",
+  "fitness": "Fitness",
+  "travel": "Travel",
+  "food": "Food",
+  "fashion": "Fashion",
+  "art": "Art",
+  "sports": "Sports",
+  "videogames": "Video games",
+  "crafts": "Crafts",
+  "dance": "Dance",
+  "photography": "Photography",
+  "cooking": "Cooking",
+  "writing": "Writing",
+  "livestreaming": "Live streaming"
+ },
+ "goals": {
+  "best_friend": "Best friend",
+  "casual_friend": "Casual friend",
+  "activity_buddy": "Activity buddy",
+  "travel_friend": "Travel friend",
+  "creative_friend": "Creative friend",
+  "intellectual_friend": "Intellectual friend",
+  "workout_friend": "Workout partner",
+  "parent_friend": "Parent friend",
+  "local_social_group": "Local social group",
+  "online_friend": "Online friend",
+  "other": "Other"
+ },
+ "depth": {
+  "shallow": "Light",
+  "moderate": "Moderate",
+  "deep": "Deep"
+ },
+ "group": {
+  "one_on_one": "One on one",
+  "small_group": "Small group",
+  "large_group": "Large group"
+ },
+ "bodies": {
+  "sun": "Sun",
+  "moon": "Moon",
+  "ascendant": "Asc."
+ },
+ "dimension": {
+  "astrology": "your charts point to a strong connection",
+  "personality": "your ways of being fit well together",
+  "interests": "you share several interests",
+  "lifestyle": "you have a similar pace of life",
+  "social_preferences": "you look for the same kind of conversation",
+  "friendship_goals": "you look for the same kind of friendship",
+  "geo_proximity": "you live close to each other"
+ },
+ "explanation": {
+  "withInterests": "You both like {interests}, and {phrase}.",
+  "withoutInterests": "{phrase}"
+ },
+ "tiers": {
+  "free": "Free",
+  "cosmic": "Cosmic",
+  "nebula": "Nebula"
+ },
+ "noChart": "The natal chart isn't available yet."
+}

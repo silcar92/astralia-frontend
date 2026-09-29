@@ -1,0 +1,36 @@
+{
+ "title": "Notificaciones",
+ "markAll": "Marcar todo",
+ "loading": "Cargando tus notificaciones…",
+ "empty": "No tienes notificaciones todavía. Aquí aparecerán tus conexiones y mensajes.",
+ "loadFailed": "No pudimos cargar tus notificaciones.",
+ "groups": {
+  "today": "Hoy",
+  "week": "Esta semana",
+  "before": "Antes"
+ },
+ "accept": "Aceptar",
+ "accepted": "Solicitud aceptada.",
+ "handled": "Solicitud ya atendida.",
+ "acceptFailed": "No pudimos aceptar la solicitud. Intenta de nuevo.",
+ "messages": {
+  "connection_request": "{name} quiere conectar contigo.",
+  "connection_accepted_mine": "Te conectaste con {name}: ahora brilla en tu Galaxia.",
+  "connection_accepted_theirs": "{name} aceptó tu conexión — ahora brilla en tu Galaxia.",
+  "new_message": "{name} te envió un mensaje.",
+  "membership_approved": "Ya eres parte de {community}.",
+  "moderator_promoted": "Ahora eres moderador de {community}.",
+  "moderator_demoted": "Ya no eres moderador de {community}.",
+  "owner_handed_to_you": "{name} te legó {community}: ahora eres su creador.",
+  "owner_handed_over": "{name} legó {community} a {to}, su nuevo creador.",
+  "community_closed": "{community} fue cerrada por su creador y quedó deshabilitada.",
+  "owner_auto_new": "El creador dejó {community}: ahora eres su creador.",
+  "owner_auto_changed": "{community} tiene un nuevo creador: {to}.",
+  "event_waitlist_promoted": "Se liberó un lugar: ya estás confirmado en {event}.",
+  "event_cancelled": "Se canceló el evento {event}.",
+  "verification_approved": "Tu verificación de identidad fue aprobada.",
+  "verification_rejected": "Tu verificación de identidad fue rechazada. Revisa el detalle e inténtalo de nuevo.",
+  "age_segment_changed": "Ahora estás en el grupo de 18 años o más. Tus conexiones, comunidades y eventos del grupo de 16 a 17 ya no están disponibles.",
+  "connection_ended": "Una de tus conexiones ya no está disponible."
+ }
+}

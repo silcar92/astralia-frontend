@@ -1,0 +1,16 @@
+{
+ "title": "Chats",
+ "loading": "Cargando tus chats…",
+ "locked": "El chat se desbloquea cuando conectas con alguien. Ve a Discover o Cosmic Storm para empezar.",
+ "noMessages": "Aún no hay mensajes. ¡Saluda primero!",
+ "loadFailed": "No pudimos cargar tus chats.",
+ "conversation": {
+  "title": "Chat",
+  "back": "Volver a chats",
+  "loading": "Cargando conversación…",
+  "empty": "Todavía no hay mensajes. Este es el comienzo de la conversación.",
+  "placeholder": "Escribe un mensaje…",
+  "send": "Enviar",
+  "loadFailed": "No pudimos cargar la conversación."
+ }
+}

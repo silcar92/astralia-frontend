@@ -1,15 +1,16 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
-import { CommunityBanner, memberLabel } from "@/components/communities/CommunityBanner";
+import { CommunityBanner, useMemberLabel } from "@/components/communities/CommunityBanner";
 import { JoinButton } from "@/components/communities/JoinButton";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as communityService from "@/services/communityService";
 import type { Community } from "@/services/communityService";
 
@@ -17,6 +18,9 @@ type Tab = "mine" | "explore";
 
 export default function CommunitiesPage() {
   const router = useRouter();
+  const t = useTranslations("communities");
+  const errorMessage = useErrorMessage();
+  const memberLabel = useMemberLabel();
   const { status, profile } = useAuth();
   const [communities, setCommunities] = useState<Community[] | null>(null);
   const [tab, setTab] = useState<Tab | null>(null);
@@ -40,13 +44,8 @@ export default function CommunitiesPage() {
         setCommunities(res.results);
         setTab((current) => current ?? (res.results.some((c) => c.my_status === "approved" || c.my_status === "pending") ? "mine" : "explore"));
       })
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar las comunidades.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const handleJoin = async (community: Community) => {
@@ -62,7 +61,7 @@ export default function CommunitiesPage() {
           ) ?? null
       );
     } catch {
-      setError("No pudimos procesar tu solicitud. Intenta de nuevo.");
+      setError(t("joinFailed"));
     } finally {
       setBusyId(null);
     }
@@ -72,15 +71,15 @@ export default function CommunitiesPage() {
   const visible = (communities ?? []).filter((c) => (tab === "mine" ? isMine(c) : !isMine(c)));
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "mine", label: "Mis comunidades" },
-    { key: "explore", label: "Explorar" },
+    { key: "mine", label: t("tabMine") },
+    { key: "explore", label: t("tabExplore") },
   ];
 
   return (
     <main className="flex min-h-screen flex-col px-[22px] pt-8" style={{ fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}>
       <div className="flex items-center justify-between">
         <div className="text-[26px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Comunidades
+          {t("title")}
         </div>
         <div className="flex items-center gap-2.5">
           {profile?.is_approved_community_creator && (
@@ -89,7 +88,7 @@ export default function CommunitiesPage() {
               className="text-[11px] font-bold rounded-full px-3.5 py-2"
               style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
             >
-              + Crear
+              {t("create")}
             </Link>
           )}
           <HeaderActions />
@@ -123,7 +122,7 @@ export default function CommunitiesPage() {
           className="flex-1 text-center py-2.5 rounded-[14px] text-xs"
           style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#B9A8DE" }}
         >
-          Eventos
+          {t("tabEvents")}
         </Link>
       </div>
 
@@ -135,15 +134,13 @@ export default function CommunitiesPage() {
 
       {!error && communities === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando comunidades…
+          {t("loading")}
         </p>
       )}
 
       {!error && communities !== null && visible.length === 0 && (
         <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
-          {tab === "mine"
-            ? "Aún no eres parte de ninguna comunidad. Explora las disponibles y únete."
-            : "No hay más comunidades para explorar por ahora."}
+          {tab === "mine" ? t("emptyMine") : t("emptyExplore")}
         </p>
       )}
 
@@ -167,7 +164,7 @@ export default function CommunitiesPage() {
                 className="absolute right-3.5 bottom-3.5 px-4 py-2 rounded-full text-[11px] font-bold"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)" }}
               >
-                Cerrada
+                {t("closed")}
               </span>
             </div>
           ) : (
@@ -176,7 +173,7 @@ export default function CommunitiesPage() {
             className="relative rounded-[20px] overflow-hidden"
             style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)" }}
           >
-            <Link href={`/communities/${community.id}`} className="block" aria-label={`Abrir ${community.name}`}>
+            <Link href={`/communities/${community.id}`} className="block" aria-label={t("open", { name: community.name })}>
               <CommunityBanner id={community.id} />
               <div className="p-3.5 pr-[120px]">
                 <div className="text-sm font-bold truncate">{community.name}</div>

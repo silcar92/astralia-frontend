@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,11 +9,15 @@ import { BottomNav } from "@/components/BottomNav";
 import { GoldButton } from "@/components/ui/GoldButton";
 import { TextField } from "@/components/ui/TextField";
 import { useAuth } from "@/hooks/useAuth";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import { ApiError } from "@/services/apiClient";
 import * as communityService from "@/services/communityService";
 
 export default function NewCommunityPage() {
   const router = useRouter();
+  const t = useTranslations("communities.new");
+  const tb = useTranslations("communities");
+  const errorMessage = useErrorMessage();
   const { status, profile } = useAuth();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -37,8 +42,8 @@ export default function NewCommunityPage() {
       const created = await communityService.createCommunity({ name: name.trim(), description: description.trim(), visibility });
       router.replace(`/communities/${created.id}`);
     } catch (err) {
-      const body = err instanceof ApiError ? (err.body as { name?: string[]; detail?: string } | null) : null;
-      setError(body?.name?.[0]?.includes("already exists") ? "Ya existe una comunidad con ese nombre." : body?.detail ?? "No pudimos crear la comunidad. Intenta de nuevo.");
+      const nameTaken = err instanceof ApiError && JSON.stringify((err.body as { codes?: unknown } | null)?.codes ?? "").includes("unique");
+      setError(nameTaken ? t("nameTaken") : errorMessage(err, "createFailed"));
       setSaving(false);
     }
   };
@@ -48,7 +53,7 @@ export default function NewCommunityPage() {
       <div className="flex items-center gap-3">
         <Link
           href="/communities"
-          aria-label="Volver a comunidades"
+          aria-label={tb("back")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
         >
@@ -57,28 +62,28 @@ export default function NewCommunityPage() {
           </svg>
         </Link>
         <span className="text-[18px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          Nueva comunidad
+          {t("title")}
         </span>
       </div>
 
       {profile && !canCreate ? (
         <p className="text-center text-sm mt-16 px-6" style={{ color: "var(--astralia-lilac)" }}>
-          Por ahora solo los creadores aprobados pueden crear comunidades (PRD §18).
+          {t("onlyApproved")}
         </p>
       ) : (
         <form onSubmit={submit} className="flex flex-col gap-4 mt-6">
-          <TextField label="Nombre" name="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} required />
+          <TextField label={t("name")} name="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={120} required />
 
           <label className="flex flex-col gap-1.5">
             <span className="text-xs tracking-wide uppercase" style={{ color: "var(--astralia-lilac)" }}>
-              Descripción
+              {t("description")}
             </span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
               maxLength={500}
-              placeholder="¿De qué trata y quién debería unirse?"
+              placeholder={t("descriptionPlaceholder")}
               className="rounded-2xl px-4 py-3 text-sm outline-none resize-none"
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "var(--astralia-text)" }}
             />
@@ -86,13 +91,13 @@ export default function NewCommunityPage() {
 
           <fieldset className="flex flex-col gap-1.5">
             <legend className="text-xs tracking-wide uppercase mb-1.5" style={{ color: "var(--astralia-lilac)" }}>
-              Visibilidad
+              {t("visibility")}
             </legend>
             <div className="flex gap-2">
               {(
                 [
-                  ["public", "Pública", "Cualquiera puede unirse"],
-                  ["private", "Privada", "Apruebas cada solicitud"],
+                  ["public", tb("visibility.public"), t("publicHint")],
+                  ["private", tb("visibility.private"), t("privateHint")],
                 ] as const
               ).map(([value, label, hint]) => {
                 const active = visibility === value;
@@ -127,10 +132,10 @@ export default function NewCommunityPage() {
           )}
 
           <GoldButton type="submit" disabled={saving || !name.trim()}>
-            {saving ? "Creando…" : "Crear comunidad"}
+            {saving ? t("creating") : t("submit")}
           </GoldButton>
           <p className="text-[11px] text-center" style={{ color: "#8E7FB0" }}>
-            Tu comunidad será solo para tu grupo de edad (16-17 o 18+). Tú serás su moderador.
+            {t("note")}
           </p>
         </form>
       )}

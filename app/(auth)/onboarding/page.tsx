@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -15,6 +16,7 @@ type Step = "birth" | "preferences" | "personality" | "reveal";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const t = useTranslations("onboarding.page");
   const { refreshProfile } = useAuth();
 
   const [step, setStep] = useState<Step>("birth");
@@ -44,7 +46,7 @@ export default function OnboardingPage() {
       });
       setStep("personality");
     } catch {
-      setProfileError("No pudimos guardar tu perfil. Intenta de nuevo.");
+      setProfileError(t("saveFailed"));
     } finally {
       setCreatingProfile(false);
     }
@@ -71,7 +73,7 @@ export default function OnboardingPage() {
           <PreferencesStep onNext={handlePreferencesNext} onBack={() => setStep("birth")} />
           {creatingProfile && (
             <p className="mt-3 text-center text-xs" style={{ color: "var(--astralia-lilac)" }}>
-              Guardando tu perfil…
+              {t("saving")}
             </p>
           )}
           {profileError && (

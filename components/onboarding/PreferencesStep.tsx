@@ -1,9 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
+import { Chip } from "@/components/ui/Chip";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GoldButton } from "@/components/ui/GoldButton";
+import { useCatalog } from "@/hooks/useCatalog";
 import * as profileService from "@/services/profileService";
 import type { FriendshipGoal, Interest } from "@/services/profileService";
 
@@ -14,36 +17,12 @@ export type Preferences = {
   group_preference: string;
 };
 
-const CONVERSATION_DEPTH_OPTIONS = [
-  { value: "shallow", label: "Ligera" },
-  { value: "moderate", label: "Moderada" },
-  { value: "deep", label: "Profunda" },
-];
-
-const GROUP_PREFERENCE_OPTIONS = [
-  { value: "one_on_one", label: "Uno a uno" },
-  { value: "small_group", label: "Grupo pequeño" },
-  { value: "large_group", label: "Grupo grande" },
-];
-
-function Chip({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-full px-4 py-2 text-xs transition-colors"
-      style={
-        selected
-          ? { background: "rgba(232,217,181,0.18)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }
-          : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "var(--astralia-lilac)" }
-      }
-    >
-      {children}
-    </button>
-  );
-}
+const CONVERSATION_DEPTH_VALUES = ["shallow", "moderate", "deep"];
+const GROUP_PREFERENCE_VALUES = ["one_on_one", "small_group", "large_group"];
 
 export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences) => void; onBack: () => void }) {
+  const t = useTranslations("onboarding.preferences");
+  const catalog = useCatalog();
   const [interests, setInterests] = useState<Interest[]>([]);
   const [goals, setGoals] = useState<FriendshipGoal[]>([]);
   const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
@@ -63,19 +42,19 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
   return (
     <div className="w-full max-w-sm">
       <p className="text-xs tracking-widest uppercase text-center" style={{ color: "var(--astralia-lilac)" }}>
-        Paso 2 de 4
+        {t("step")}
       </p>
       <h1
         className="mt-2 text-center text-2xl italic font-semibold"
         style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}
       >
-        Lo que te mueve
+        {t("title")}
       </h1>
 
       <GlassCard className="mt-6 flex flex-col gap-5">
         <div>
           <p className="text-xs uppercase tracking-wide mb-2" style={{ color: "var(--astralia-lilac)" }}>
-            Intereses
+            {t("interests")}
           </p>
           <div className="flex flex-wrap gap-2">
             {interests.map((interest) => (
@@ -84,7 +63,7 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
                 selected={selectedInterests.includes(interest.id)}
                 onClick={() => toggle(selectedInterests, setSelectedInterests, interest.id)}
               >
-                {interest.name}
+                {catalog.interest(interest)}
               </Chip>
             ))}
           </div>
@@ -92,7 +71,7 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
 
         <div>
           <p className="text-xs uppercase tracking-wide mb-2" style={{ color: "var(--astralia-lilac)" }}>
-            ¿Qué tipo de amistad buscas?
+            {t("goals")}
           </p>
           <div className="flex flex-wrap gap-2">
             {goals.map((goal) => (
@@ -101,7 +80,7 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
                 selected={selectedGoals.includes(goal.id)}
                 onClick={() => toggle(selectedGoals, setSelectedGoals, goal.id)}
               >
-                {goal.label}
+                {catalog.goal(goal)}
               </Chip>
             ))}
           </div>
@@ -109,16 +88,12 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
 
         <div>
           <p className="text-xs uppercase tracking-wide mb-2" style={{ color: "var(--astralia-lilac)" }}>
-            Profundidad de conversación
+            {t("depth")}
           </p>
           <div className="flex gap-2">
-            {CONVERSATION_DEPTH_OPTIONS.map((option) => (
-              <Chip
-                key={option.value}
-                selected={conversationDepth === option.value}
-                onClick={() => setConversationDepth(option.value)}
-              >
-                {option.label}
+            {CONVERSATION_DEPTH_VALUES.map((value) => (
+              <Chip key={value} selected={conversationDepth === value} onClick={() => setConversationDepth(value)}>
+                {catalog.depth(value)}
               </Chip>
             ))}
           </div>
@@ -126,16 +101,12 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
 
         <div>
           <p className="text-xs uppercase tracking-wide mb-2" style={{ color: "var(--astralia-lilac)" }}>
-            Prefieres pasar tiempo en…
+            {t("group")}
           </p>
           <div className="flex flex-wrap gap-2">
-            {GROUP_PREFERENCE_OPTIONS.map((option) => (
-              <Chip
-                key={option.value}
-                selected={groupPreference === option.value}
-                onClick={() => setGroupPreference(option.value)}
-              >
-                {option.label}
+            {GROUP_PREFERENCE_VALUES.map((value) => (
+              <Chip key={value} selected={groupPreference === value} onClick={() => setGroupPreference(value)}>
+                {catalog.group(value)}
               </Chip>
             ))}
           </div>
@@ -143,7 +114,7 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
 
         <div className="flex gap-2 mt-2">
           <GoldButton type="button" variant="ghost" onClick={onBack} className="flex-1">
-            Atrás
+            {t("back")}
           </GoldButton>
           <GoldButton
             type="button"
@@ -157,7 +128,7 @@ export function PreferencesStep({ onNext, onBack }: { onNext: (data: Preferences
               })
             }
           >
-            Continuar
+            {t("continue")}
           </GoldButton>
         </div>
       </GlassCard>

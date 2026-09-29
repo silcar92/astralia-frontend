@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { PlacementsRow } from "@/components/astrology/PlacementsRow";
@@ -10,6 +11,7 @@ import type { NatalChart } from "@/services/astrologyService";
 import type { PersonalityResult } from "@/services/personalityService";
 
 export function RevealStep({ result, onEnter }: { result: PersonalityResult; onEnter: () => void }) {
+  const t = useTranslations("onboarding.reveal");
   const [chart, setChart] = useState<NatalChart | null>(null);
 
   useEffect(() => {
@@ -23,10 +25,10 @@ export function RevealStep({ result, onEnter }: { result: PersonalityResult; onE
   return (
     <div className="w-full max-w-sm text-center">
       <p className="text-xs tracking-widest uppercase" style={{ color: "var(--astralia-lilac)" }}>
-        Paso 4 de 4
+        {t("step")}
       </p>
       <h1 className="mt-2 text-2xl italic font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}>
-        Tu perfil cósmico está listo
+        {t("title")}
       </h1>
 
       <GlassCard className="mt-6 flex flex-col items-center gap-4">
@@ -40,13 +42,12 @@ export function RevealStep({ result, onEnter }: { result: PersonalityResult; onE
         <PlacementsRow sun={sun?.sign} moon={moon?.sign} ascendant={ascendant?.sign} />
 
         <p className="text-xs" style={{ color: "var(--astralia-text)" }}>
-          La astrología en Astralia es un marco de autoconocimiento y compatibilidad — no una predicción científica
-          ni determinista.
+          {t("disclaimer")}
         </p>
       </GlassCard>
 
       <GoldButton type="button" onClick={onEnter} className="mt-6 w-full">
-        Entrar a Astralia
+        {t("enter")}
       </GoldButton>
     </div>
   );

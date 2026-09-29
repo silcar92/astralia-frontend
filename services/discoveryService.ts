@@ -8,10 +8,11 @@ export type SuggestionCard = {
   country: string;
   distance_km: number | null;
   chart_highlights: { sun?: string; moon?: string; ascendant?: string };
-  shared_interests: string[];
+  shared_interests: { code: string; name: string }[];
   compatibility_score: string;
   compatibility_label: "alta" | "media" | "baja";
   explanation: string;
+  explanation_data?: { dimension?: string; shared?: { code: string; name: string }[] } | null;
   action: "pending" | "connected" | "passed";
   shown_at: string;
 };

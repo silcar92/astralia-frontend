@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Nunito_Sans } from "next/font/google";
 import "./globals.css";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+
+import { EmailVerificationBanner } from "@/components/ui/EmailVerificationBanner";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -16,20 +20,28 @@ const nunitoSans = Nunito_Sans({
   weight: ["400", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "Astralia",
-  description: "Descubre personas que pueden complementarte — tu vida social se vuelve una galaxia.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  return { title: "Astralia", description: t("description") };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="es">
+    <html lang={locale}>
       <body className={`${cormorantGaramond.variable} ${nunitoSans.variable} antialiased`} suppressHydrationWarning>
-        <AuthProvider>{children}</AuthProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AuthProvider>
+            <EmailVerificationBanner />
+            {children}
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

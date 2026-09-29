@@ -1,3 +1,6 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { relativeTime } from "@/lib/time";
@@ -12,11 +15,15 @@ function StarIcon({ filled }: { filled: boolean }) {
 }
 
 export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLike: (post: CosmosPost) => void }) {
+  const locale = useLocale();
+  const t = useTranslations("cosmos");
+  const tc = useTranslations("common");
+
   if (post.is_ad) {
     return (
       <div className="rounded-2xl p-3.5" style={{ border: "1px solid rgba(232,217,181,0.3)" }}>
         <div className="text-[9px] tracking-[1px] uppercase mb-1.5" style={{ color: "#B9A8DE" }}>
-          Patrocinado
+          {t("sponsored")}
         </div>
         <div className="text-xs" style={{ color: "#EFE9F7" }}>
           {post.text}
@@ -31,17 +38,17 @@ export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLik
     <article className="rounded-[20px] p-4" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }}>
       <Link
         href={post.is_mine ? "/profile" : `/people/${post.author}`}
-        aria-label={`Ver perfil de ${post.is_mine ? "ti" : post.author_name ?? "esta persona"}`}
+        aria-label={post.is_mine ? t("viewMyProfile") : t("viewProfile", { name: post.author_name ?? tc("someone") })}
         className="flex gap-2.5 items-center"
       >
         <div className="w-9 h-9 rounded-full shrink-0" style={{ background: "#2C2249", border: "1px solid #E8D9B5" }} />
         <div>
           <div className="text-[13px] font-bold" style={{ color: "var(--astralia-text)" }}>
-            {post.is_mine ? "Tú" : post.author_name ?? "Sin nombre"}
+            {post.is_mine ? tc("you") : post.author_name ?? tc("noName")}
           </div>
           <div className="text-[10px]" style={{ color: "#B9A8DE" }}>
-            {relativeTime(post.created_at)}
-            {post.community_name ? ` · en ${post.community_name}` : ""}
+            {relativeTime(post.created_at, locale)}
+            {post.community_name ? ` · ${t("inCommunity", { name: post.community_name })}` : ""}
           </div>
         </div>
       </Link>
@@ -53,7 +60,7 @@ export function PostCard({ post, onToggleLike }: { post: CosmosPost; onToggleLik
           type="button"
           onClick={() => onToggleLike(post)}
           aria-pressed={liked}
-          aria-label={liked ? "Quitar reacción" : "Reaccionar"}
+          aria-label={liked ? t("unreact") : t("react")}
           className="flex items-center gap-[5px]"
         >
           <StarIcon filled={liked} />

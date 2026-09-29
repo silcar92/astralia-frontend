@@ -1,0 +1,49 @@
+{
+ "birth": {
+  "step": "Paso 1 de 4",
+  "title": "Tu momento en el cielo",
+  "intro": "Necesitamos tu fecha, hora y lugar de nacimiento para calcular tu carta natal.",
+  "birthDate": "Fecha de nacimiento",
+  "birthTime": "Hora de nacimiento (opcional)",
+  "city": "Ciudad de nacimiento",
+  "country": "País de nacimiento",
+  "consent": "Doy mi consentimiento explícito para que Astralia procese mis datos de nacimiento y calcule mi carta natal.",
+  "consentRequired": "Necesitamos tu consentimiento para calcular tu carta natal.",
+  "cityNotFound": "No pudimos ubicar esa ciudad. Revisa que esté bien escrita.",
+  "geoFailed": "No pudimos calcular tu ubicación. Intenta de nuevo.",
+  "submit": "Continuar",
+  "submitting": "Ubicando…",
+  "livesSame": "Vivo en mi ciudad de nacimiento",
+  "livesTitle": "¿Dónde vives ahora?"
+ },
+ "location": {
+  "hint": "La usamos para mostrar tu ciudad y calcular distancias aproximadas. Nunca mostramos tu ubicación exacta.",
+  "city": "Ciudad donde vives",
+  "country": "País donde vives",
+  "useMine": "Usar mi ubicación",
+  "locating": "Ubicando…",
+  "denied": "No pudimos acceder a tu ubicación. Escribe tu ciudad y país.",
+  "notFound": "No pudimos ubicar esa ciudad. Revisa que esté bien escrita.",
+  "found": "Ubicación detectada: {place}"
+ },
+ "preferences": {
+  "step": "Paso 2 de 4",
+  "title": "Lo que te mueve",
+  "interests": "Intereses",
+  "goals": "¿Qué tipo de amistad buscas?",
+  "depth": "Profundidad de conversación",
+  "group": "Prefieres pasar tiempo en…",
+  "back": "Atrás",
+  "continue": "Continuar"
+ },
+ "page": {
+  "saving": "Guardando tu perfil…",
+  "saveFailed": "No pudimos guardar tu perfil. Intenta de nuevo."
+ },
+ "reveal": {
+  "step": "Paso 4 de 4",
+  "title": "Tu perfil cósmico está listo",
+  "disclaimer": "La astrología en Astralia es un marco de autoconocimiento y compatibilidad, no una predicción científica ni determinista.",
+  "enter": "Entrar a Astralia"
+ }
+}

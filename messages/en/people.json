@@ -1,0 +1,14 @@
+{
+ "title": "Profile",
+ "loading": "Loading profile…",
+ "unavailable": "This profile isn't available. You can only see people connected to you or from your communities.",
+ "loadFailed": "We couldn't load the profile. Try again.",
+ "disclaimer": "Astrology in Astralia is a tool for self-knowledge and compatibility, not a prediction.",
+ "affinity": "affinity with you",
+ "message": "Send message",
+ "connect": "Connect",
+ "requestSent": "Request sent",
+ "acceptRequest": "Accept request",
+ "connectFailed": "We couldn't send the request. Try again.",
+ "acceptFailed": "We couldn't accept the request. Try again."
+}

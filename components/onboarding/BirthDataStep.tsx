@@ -1,7 +1,9 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 
+import { LocationFields, useLocationField } from "@/components/profile/LocationFields";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { GoldButton } from "@/components/ui/GoldButton";
 import { TextField } from "@/components/ui/TextField";
@@ -22,10 +24,14 @@ export type BirthData = {
 };
 
 export function BirthDataStep({ onNext }: { onNext: (data: BirthData) => void }) {
+  const t = useTranslations("onboarding.birth");
+  const locale = useLocale();
   const [birthDate, setBirthDate] = useState("");
   const [birthTime, setBirthTime] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
+  const [birthCity, setBirthCity] = useState("");
+  const [birthCountry, setBirthCountry] = useState("");
+  const [livesSame, setLivesSame] = useState(true);
+  const living = useLocationField();
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,34 +41,40 @@ export function BirthDataStep({ onNext }: { onNext: (data: BirthData) => void })
     setError(null);
 
     if (!consent) {
-      setError("Necesitamos tu consentimiento para calcular tu carta natal.");
+      setError(t("consentRequired"));
       return;
     }
 
     setLoading(true);
     try {
-      const location = await geocodePlace(`${city}, ${country}`);
-      if (!location) {
-        setError("No pudimos ubicar esa ciudad. Revisa que esté bien escrita.");
+      const birth = await geocodePlace(`${birthCity}, ${birthCountry}`, locale);
+      if (!birth) {
+        setError(t("cityNotFound"));
         return;
       }
+
+      // dónde vive ahora: la misma ciudad de nacimiento, o la que indique (escrita o con la ubicación del dispositivo)
+      const current = livesSame
+        ? { city: birthCity.trim(), country: birthCountry.trim(), latitude: birth.latitude, longitude: birth.longitude }
+        : await living.resolve();
+      if (!current) return;
 
       onNext({
         birth_date: birthDate,
         birth_time: birthTime,
-        city,
-        country,
-        birth_place: `${city}, ${country}`,
-        birth_latitude: location.latitude,
-        birth_longitude: location.longitude,
-        // simplificación v1: misma ciudad para ubicación de nacimiento y actual -- ver lib/geocode.ts
-        current_latitude: location.latitude,
-        current_longitude: location.longitude,
+        city: current.city,
+        country: current.country,
+        birth_place: `${birthCity.trim()}, ${birthCountry.trim()}`,
+        birth_latitude: birth.latitude,
+        birth_longitude: birth.longitude,
+        current_latitude: current.latitude,
+        current_longitude: current.longitude,
+        // simplificación v1: la zona horaria de nacimiento es la del navegador; se puede corregir al editar el perfil
         birth_timezone: browserTimezone(),
         consent_accepted: consent,
       });
     } catch {
-      setError("No pudimos calcular tu ubicación. Intenta de nuevo.");
+      setError(t("geoFailed"));
     } finally {
       setLoading(false);
     }
@@ -71,71 +83,46 @@ export function BirthDataStep({ onNext }: { onNext: (data: BirthData) => void })
   return (
     <div className="w-full max-w-sm">
       <p className="text-xs tracking-widest uppercase text-center" style={{ color: "var(--astralia-lilac)" }}>
-        Paso 1 de 4
+        {t("step")}
       </p>
-      <h1
-        className="mt-2 text-center text-2xl italic font-semibold"
-        style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}
-      >
-        Tu momento en el cielo
+      <h1 className="mt-2 text-center text-2xl italic font-semibold" style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}>
+        {t("title")}
       </h1>
       <p className="mt-2 text-center text-sm" style={{ color: "var(--astralia-lilac)" }}>
-        Necesitamos tu fecha, hora y lugar de nacimiento para calcular tu carta natal.
+        {t("intro")}
       </p>
 
       <GlassCard className="mt-6 flex flex-col gap-4">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <TextField
-            label="Fecha de nacimiento"
-            type="date"
-            name="birth_date"
-            required
-            value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
-          />
-          <TextField
-            label="Hora de nacimiento (opcional)"
-            type="time"
-            name="birth_time"
-            value={birthTime}
-            onChange={(e) => setBirthTime(e.target.value)}
-          />
-          <TextField
-            label="Ciudad de nacimiento"
-            type="text"
-            name="city"
-            required
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-          <TextField
-            label="País de nacimiento"
-            type="text"
-            name="country"
-            required
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          />
+          <TextField label={t("birthDate")} type="date" name="birth_date" required value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+          <TextField label={t("birthTime")} type="time" name="birth_time" value={birthTime} onChange={(e) => setBirthTime(e.target.value)} />
+          <TextField label={t("city")} type="text" name="city" required value={birthCity} onChange={(e) => setBirthCity(e.target.value)} />
+          <TextField label={t("country")} type="text" name="country" required value={birthCountry} onChange={(e) => setBirthCountry(e.target.value)} />
+
+          <div className="flex flex-col gap-3 pt-1" style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
+            <p className="pt-3 text-xs uppercase tracking-wide" style={{ color: "var(--astralia-lilac)" }}>
+              {t("livesTitle")}
+            </p>
+            <label className="flex items-start gap-2 text-xs" style={{ color: "var(--astralia-lilac)" }}>
+              <input type="checkbox" checked={livesSame} onChange={(e) => setLivesSame(e.target.checked)} className="mt-0.5" />
+              {t("livesSame")}
+            </label>
+            {!livesSame && <LocationFields field={living} />}
+          </div>
 
           <label className="flex items-start gap-2 text-xs" style={{ color: "var(--astralia-lilac)" }}>
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              className="mt-0.5"
-            />
-            Doy mi consentimiento explícito para que Astralia procese mis datos de nacimiento y calcule mi carta
-            natal.
+            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
+            {t("consent")}
           </label>
 
           {error && (
-            <p className="text-xs" style={{ color: "var(--astralia-alert)" }}>
+            <p className="text-xs" style={{ color: "var(--astralia-alert)" }} role="alert">
               {error}
             </p>
           )}
 
           <GoldButton type="submit" disabled={loading} className="mt-2">
-            {loading ? "Ubicando…" : "Continuar"}
+            {loading ? t("submitting") : t("submit")}
           </GoldButton>
         </form>
       </GlassCard>

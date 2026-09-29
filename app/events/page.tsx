@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { EventCard } from "@/components/events/EventCard";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as eventService from "@/services/eventService";
 import type { AstraliaEvent } from "@/services/eventService";
 
@@ -16,6 +17,8 @@ type Tab = "upcoming" | "mine";
 
 export default function EventsPage() {
   const router = useRouter();
+  const t = useTranslations("events");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [events, setEvents] = useState<AstraliaEvent[] | null>(null);
   const [tab, setTab] = useState<Tab>("upcoming");
@@ -37,13 +40,8 @@ export default function EventsPage() {
     eventService
       .fetchEvents()
       .then((res) => setEvents(res.results))
-      .catch((err) => {
-        setError(
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar los eventos.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo."
-        );
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const handleRsvp = async (event: AstraliaEvent) => {
@@ -53,7 +51,7 @@ export default function EventsPage() {
       const res = await eventService.rsvp(event.id);
       setEvents((prev) => prev?.map((e) => (e.id === event.id ? { ...e, my_status: res.status, going_count: res.going_count } : e)) ?? null);
     } catch (err) {
-      setNotice(err instanceof ApiError ? (err.body as { detail?: string })?.detail ?? "No pudimos registrar tu asistencia." : "No pudimos registrar tu asistencia.");
+      setNotice(errorMessage(err, "rsvpFailed"));
     } finally {
       setBusyId(null);
     }
@@ -62,8 +60,8 @@ export default function EventsPage() {
   const visible = (events ?? []).filter((e) => (tab === "mine" ? e.my_status !== null || e.is_organizer : true));
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "upcoming", label: "Próximos" },
-    { key: "mine", label: "Mis eventos" },
+    { key: "upcoming", label: t("tabUpcoming") },
+    { key: "mine", label: t("tabMine") },
   ];
 
   return (
@@ -72,7 +70,7 @@ export default function EventsPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/communities"
-            aria-label="Volver a comunidades"
+            aria-label={t("backToCommunities")}
             className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
             style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
           >
@@ -81,7 +79,7 @@ export default function EventsPage() {
             </svg>
           </Link>
           <span className="text-[26px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-            Eventos
+            {t("title")}
           </span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -90,7 +88,7 @@ export default function EventsPage() {
             className="text-[11px] font-bold rounded-full px-3.5 py-2"
             style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
           >
-            + Organizar
+            {t("organize")}
           </Link>
           <HeaderActions />
         </div>
@@ -134,15 +132,13 @@ export default function EventsPage() {
 
       {!error && events === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando eventos…
+          {t("loading")}
         </p>
       )}
 
       {!error && events !== null && visible.length === 0 && (
         <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
-          {tab === "mine"
-            ? "Todavía no tienes eventos. Confirma tu asistencia a uno o organiza el tuyo."
-            : "No hay eventos próximos. ¡Organiza el primero!"}
+          {tab === "mine" ? t("emptyMine") : t("emptyUpcoming")}
         </p>
       )}
 

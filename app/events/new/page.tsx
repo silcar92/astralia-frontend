@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +9,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { GoldButton } from "@/components/ui/GoldButton";
 import { TextField } from "@/components/ui/TextField";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as eventService from "@/services/eventService";
 
 function toLocalInput(date: Date): string {
@@ -18,6 +19,9 @@ function toLocalInput(date: Date): string {
 
 function NewEventForm() {
   const router = useRouter();
+  const t = useTranslations("events.new");
+  const te = useTranslations("events");
+  const errorMessage = useErrorMessage();
   const communityParam = useSearchParams().get("community");
   const communityId = communityParam && /^\d+$/.test(communityParam) ? Number(communityParam) : undefined;
   const { status, profile } = useAuth();
@@ -58,13 +62,7 @@ function NewEventForm() {
       });
       router.replace(`/events/${created.id}`);
     } catch (err) {
-      let message = "No pudimos crear el evento. Intenta de nuevo.";
-      if (err instanceof ApiError && err.body && typeof err.body === "object") {
-        const body = err.body as Record<string, unknown>;
-        const first = typeof body.detail === "string" ? body.detail : Object.values(body).flat()[0];
-        if (typeof first === "string") message = first;
-      }
-      setError(message);
+      setError(errorMessage(err, "createFailed"));
       setSaving(false);
     }
   };
@@ -76,7 +74,7 @@ function NewEventForm() {
       <div className="flex items-center gap-3">
         <Link
           href={communityId ? `/communities/${communityId}` : "/events"}
-          aria-label="Volver"
+          aria-label={te("back")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
         >
@@ -85,16 +83,16 @@ function NewEventForm() {
           </svg>
         </Link>
         <span className="text-[18px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-          {communityId ? "Evento de la comunidad" : "Organizar un evento"}
+          {communityId ? t("titleCommunity") : t("titleOwn")}
         </span>
       </div>
 
       <form onSubmit={submit} className="flex flex-col gap-4 mt-6">
-        <TextField label="Título" name="title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} required />
+        <TextField label={t("name")} name="title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} required />
 
         <label className="flex flex-col gap-1.5">
           <span className="text-xs tracking-wide uppercase" style={{ color: "var(--astralia-lilac)" }}>
-            Descripción
+            {t("description")}
           </span>
           <textarea
             value={description}
@@ -108,13 +106,13 @@ function NewEventForm() {
 
         <fieldset>
           <legend className="text-xs tracking-wide uppercase mb-1.5" style={{ color: "var(--astralia-lilac)" }}>
-            Formato
+            {t("format")}
           </legend>
           <div className="flex gap-2">
             {(
               [
-                ["online", "En línea"],
-                ["in_person", "Presencial"],
+                ["online", te("format.online")],
+                ["in_person", te("format.in_person")],
               ] as const
             ).map(([value, label]) => {
               const active = format === value;
@@ -139,13 +137,13 @@ function NewEventForm() {
           </div>
           {needsVerification && (
             <p className="text-[11px] mt-2" style={{ color: "var(--astralia-alert)" }}>
-              Para organizar un evento presencial tu identidad debe estar verificada (PRD §19).
+              {t("needsVerification")}
             </p>
           )}
         </fieldset>
 
         <TextField
-          label={format === "online" ? "Enlace o plataforma (opcional)" : "Dirección"}
+          label={format === "online" ? t("linkLabel") : t("addressLabel")}
           name="location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
@@ -153,9 +151,9 @@ function NewEventForm() {
           required={format === "in_person"}
         />
 
-        <TextField label="Inicio" name="starts_at" type="datetime-local" min={minStart} value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
-        <TextField label="Fin (opcional)" name="ends_at" type="datetime-local" min={startsAt || minStart} value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
-        <TextField label="Cupo (opcional, vacío = sin límite)" name="capacity" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+        <TextField label={t("starts")} name="starts_at" type="datetime-local" min={minStart} value={startsAt} onChange={(e) => setStartsAt(e.target.value)} required />
+        <TextField label={t("ends")} name="ends_at" type="datetime-local" min={startsAt || minStart} value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+        <TextField label={t("capacity")} name="capacity" type="number" min={1} value={capacity} onChange={(e) => setCapacity(e.target.value)} />
 
         {error && (
           <p className="text-xs" style={{ color: "var(--astralia-alert)" }} role="alert">
@@ -164,10 +162,10 @@ function NewEventForm() {
         )}
 
         <GoldButton type="submit" disabled={saving || !title.trim() || !startsAt || needsVerification}>
-          {saving ? "Creando…" : "Crear evento"}
+          {saving ? t("creating") : t("submit")}
         </GoldButton>
         <p className="text-[11px] text-center" style={{ color: "#8E7FB0" }}>
-          Solo lo verá tu grupo de edad (16-17 o 18+). En eventos presenciales, la dirección solo se muestra a quienes confirmen.
+          {t("note")}
         </p>
       </form>
 

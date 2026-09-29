@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { GlassCard } from "@/components/ui/GlassCard";
@@ -9,15 +10,10 @@ import type { PersonalityItem, PersonalityResult } from "@/services/personalityS
 
 type TestLength = "short" | "medium" | "full";
 
-const LENGTH_OPTIONS: { value: TestLength; label: string; minutes: string }[] = [
-  { value: "short", label: "Rápido", minutes: "2 min" },
-  { value: "medium", label: "Equilibrado", minutes: "5 min" },
-  { value: "full", label: "Completo", minutes: "10 min" },
-];
-
-const RATING_LABELS = ["Muy en desacuerdo", "En desacuerdo", "Neutral", "De acuerdo", "Muy de acuerdo"];
+const LENGTH_VALUES: TestLength[] = ["short", "medium", "full"];
 
 export function PersonalityStep({ onDone }: { onDone: (result: PersonalityResult) => void }) {
+  const t = useTranslations("personality");
   const [testLength, setTestLength] = useState<TestLength | null>(null);
   const [items, setItems] = useState<PersonalityItem[]>([]);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -46,30 +42,26 @@ export function PersonalityStep({ onDone }: { onDone: (result: PersonalityResult
     return (
       <div className="w-full max-w-sm">
         <p className="text-xs tracking-widest uppercase text-center" style={{ color: "var(--astralia-lilac)" }}>
-          Paso 3 de 4
+          {t("ui.step1")}
         </p>
         <h1
           className="mt-2 text-center text-2xl italic font-semibold"
           style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}
         >
-          Tu Cosmic Personality
+          {t("ui.title")}
         </h1>
         <p className="mt-2 text-center text-sm" style={{ color: "var(--astralia-lilac)" }}>
-          Entre más largo el test, más detallado tu resultado.
+          {t("ui.intro")}
         </p>
 
         <div className="mt-6 flex flex-col gap-3">
-          {LENGTH_OPTIONS.map((option) => (
-            <GlassCard
-              key={option.value}
-              className="cursor-pointer flex items-center justify-between"
-              onClick={() => setTestLength(option.value)}
-            >
+          {LENGTH_VALUES.map((value) => (
+            <GlassCard key={value} className="cursor-pointer flex items-center justify-between" onClick={() => setTestLength(value)}>
               <span className="font-semibold" style={{ color: "var(--astralia-text)" }}>
-                {option.label}
+                {t(`ui.lengths.${value}`)}
               </span>
               <span className="text-sm" style={{ color: "var(--astralia-gold)" }}>
-                {option.minutes}
+                {t(`ui.minutes.${value}`)}
               </span>
             </GlassCard>
           ))}
@@ -81,21 +73,21 @@ export function PersonalityStep({ onDone }: { onDone: (result: PersonalityResult
   return (
     <div className="w-full max-w-sm">
       <p className="text-xs tracking-widest uppercase text-center" style={{ color: "var(--astralia-lilac)" }}>
-        {answeredCount} / {items.length} respondidas
+        {t("ui.answered", { count: answeredCount, total: items.length })}
       </p>
 
       <div className="mt-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto pr-1">
         {items.map((item, index) => (
           <GlassCard key={item.id}>
             <p className="text-sm" style={{ color: "var(--astralia-text)" }}>
-              {index + 1}. {item.text}
+              {index + 1}. {t.has(`items.${item.key}`) ? t(`items.${item.key}`) : item.text}
             </p>
             <div className="mt-3 flex justify-between gap-1">
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
                   type="button"
-                  title={RATING_LABELS[value - 1]}
+                  title={t(`ui.ratings.${value - 1}`)}
                   onClick={() => setAnswers((prev) => ({ ...prev, [item.id]: value }))}
                   className="h-9 w-9 rounded-full text-xs font-semibold"
                   style={
@@ -117,7 +109,7 @@ export function PersonalityStep({ onDone }: { onDone: (result: PersonalityResult
       </div>
 
       <GoldButton type="button" disabled={!allAnswered || loading} onClick={handleSubmit} className="mt-4 w-full">
-        {loading ? "Calculando tu Cosmic Personality…" : "Ver mi resultado"}
+        {loading ? t("ui.submitting") : t("ui.submit")}
       </GoldButton>
     </div>
   );

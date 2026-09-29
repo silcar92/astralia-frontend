@@ -1,3 +1,7 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
+
 const BANNERS = [
   {
     background: "linear-gradient(135deg,#5B4E85,#2C2249)",
@@ -41,7 +45,12 @@ export function CommunityBanner({ id, height = 76, disabled = false }: { id: num
   );
 }
 
-export function memberLabel(count: number, visibility: "public" | "private"): string {
-  const members = `${new Intl.NumberFormat("es").format(count)} ${count === 1 ? "miembro" : "miembros"}`;
-  return `${members} · ${visibility === "public" ? "Pública" : "Privada"}`;
+// "1.200 miembros · Pública" en el idioma actual
+export function useMemberLabel() {
+  const locale = useLocale();
+  const tc = useTranslations("common");
+  const t = useTranslations("communities.visibility");
+
+  return (count: number, visibility: "public" | "private") =>
+    `${tc("members", { count, formatted: new Intl.NumberFormat(locale).format(count) })} · ${t(visibility)}`;
 }

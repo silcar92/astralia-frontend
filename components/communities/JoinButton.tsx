@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import type { Community } from "@/services/communityService";
 
 export function JoinButton({
@@ -9,26 +13,27 @@ export function JoinButton({
   busy: boolean;
   onJoin: () => void;
 }) {
+  const t = useTranslations("communities.join");
   const chip = "px-4 py-2 rounded-full text-[11px] font-bold";
 
   if (community.my_status === "approved") {
     return (
       <span className={chip} style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}>
-        Miembro
+        {t("member")}
       </span>
     );
   }
   if (community.my_status === "pending") {
     return (
       <span className={chip} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "#B9A8DE" }}>
-        Pendiente
+        {t("pending")}
       </span>
     );
   }
   if (community.my_status === "rejected") {
     return (
       <span className={chip} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "#8E7FB0" }}>
-        No disponible
+        {t("unavailable")}
       </span>
     );
   }
@@ -46,7 +51,7 @@ export function JoinButton({
           : { background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "#EFE9F7" }
       }
     >
-      {isPublic ? "Unirse" : "Solicitar"}
+      {isPublic ? t("join") : t("request")}
     </button>
   );
 }

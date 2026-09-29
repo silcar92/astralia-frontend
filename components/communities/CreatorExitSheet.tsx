@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import * as communityService from "@/services/communityService";
@@ -18,6 +19,7 @@ export function CreatorExitSheet({
   onClose: () => void;
   onDone: () => void;
 }) {
+  const t = useTranslations("communities.exit");
   const [step, setStep] = useState<Step>("choose");
   const [members, setMembers] = useState<CommunityMember[] | null>(null);
   const [selected, setSelected] = useState<CommunityMember | null>(null);
@@ -29,8 +31,8 @@ export function CreatorExitSheet({
     communityService
       .fetchMembers(community.id)
       .then((res) => setMembers(res.results.filter((m) => !m.is_me)))
-      .catch(() => setError("No pudimos cargar los miembros."));
-  }, [community.id]);
+      .catch(() => setError(t("loadFailed")));
+  }, [community.id, t]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -47,12 +49,12 @@ export function CreatorExitSheet({
       await action();
       onDone();
     } catch {
-      setError("No pudimos completar la acción. Intenta de nuevo.");
+      setError(t("actionFailed"));
       setBusy(false);
     }
   };
 
-  const heading = step === "choose" ? "Dejar la comunidad" : step === "transfer" ? "Elige al nuevo creador" : "Cerrar la comunidad";
+  const heading = step === "choose" ? t("leaveTitle") : step === "transfer" ? t("transferTitle") : t("closeTitle");
   const noOthers = members !== null && members.length === 0;
 
   return (
@@ -76,7 +78,7 @@ export function CreatorExitSheet({
         {step === "choose" && (
           <>
             <p className="text-xs leading-[1.5]" style={{ color: "var(--astralia-lilac)" }}>
-              Como creador de {community.name}, antes de salir debes dejarla en buenas manos o cerrarla.
+              {t("intro", { name: community.name })}
             </p>
             <button
               type="button"
@@ -86,10 +88,10 @@ export function CreatorExitSheet({
               style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)" }}
             >
               <div className="text-[13px] font-bold" style={{ color: "#F3E9C8" }}>
-                Legar la comunidad
+                {t("transfer")}
               </div>
               <div className="text-[11px] mt-0.5" style={{ color: "#B9A8DE" }}>
-                {noOthers ? "No hay otros miembros a quienes legársela." : "Otro miembro pasa a ser el creador y tú sales."}
+                {noOthers ? t("noOthers") : t("transferHint")}
               </div>
             </button>
             <button
@@ -99,10 +101,10 @@ export function CreatorExitSheet({
               style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)" }}
             >
               <div className="text-[13px] font-bold" style={{ color: "var(--astralia-text)" }}>
-                Cerrar para siempre
+                {t("close")}
               </div>
               <div className="text-[11px] mt-0.5" style={{ color: "#B9A8DE" }}>
-                Queda deshabilitada para todos. No se puede deshacer.
+                {t("closeHint")}
               </div>
             </button>
           </>
@@ -111,14 +113,14 @@ export function CreatorExitSheet({
         {step === "transfer" && (
           <>
             <p className="text-xs" style={{ color: "var(--astralia-lilac)" }}>
-              Primero los moderadores y luego los demás miembros, del más antiguo al más reciente.
+              {t("order")}
             </p>
             {members === null && !error && (
               <p className="text-xs" style={{ color: "var(--astralia-lilac)" }}>
-                Cargando…
+                {t("loading")}
               </p>
             )}
-            <div className="flex flex-col gap-2" role="radiogroup" aria-label="Nuevo creador">
+            <div className="flex flex-col gap-2" role="radiogroup" aria-label={t("newCreator")}>
               {members?.map((member) => {
                 const active = selected?.id === member.id;
                 return (
@@ -138,7 +140,7 @@ export function CreatorExitSheet({
                     <span className="text-[13px] font-bold flex-grow truncate">{member.user_name}</span>
                     {member.is_moderator && (
                       <span className="text-[9px] uppercase tracking-[0.5px]" style={{ color: "#D9C9F0" }}>
-                        Moderador
+                        {t("moderator")}
                       </span>
                     )}
                   </button>
@@ -147,7 +149,7 @@ export function CreatorExitSheet({
             </div>
             {selected && (
               <p className="text-[11px]" style={{ color: "#B9A8DE" }}>
-                {selected.user_name} será el creador y moderador. Tú dejarás de ser parte de la comunidad y todos recibirán un aviso.
+                {t("transferNote", { name: selected.user_name })}
               </p>
             )}
           </>
@@ -156,12 +158,11 @@ export function CreatorExitSheet({
         {step === "close" && (
           <>
             <p className="text-xs leading-[1.5]" style={{ color: "var(--astralia-lilac)" }}>
-              {community.name} quedará deshabilitada para todos: nadie podrá unirse, publicar ni abrirla, y sus publicaciones y eventos dejarán de mostrarse.
-              Aparecerá en gris al final del listado. Los miembros recibirán un aviso. Esta acción no se puede deshacer.
+              {t("closeWarning", { name: community.name })}
             </p>
             <label className="flex flex-col gap-1.5">
               <span className="text-[11px]" style={{ color: "#B9A8DE" }}>
-                Para confirmar, escribe el nombre de la comunidad
+                {t("typeName")}
               </span>
               <input
                 value={typed}
@@ -188,7 +189,7 @@ export function CreatorExitSheet({
             className="flex-1 py-3 rounded-full text-[13px] font-semibold"
             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)", color: "var(--astralia-text)" }}
           >
-            {step === "choose" ? "Cancelar" : "Atrás"}
+            {step === "choose" ? t("cancel") : t("back")}
           </button>
           {step === "transfer" && (
             <button
@@ -198,7 +199,7 @@ export function CreatorExitSheet({
               className="flex-1 py-3 rounded-full text-[13px] font-bold disabled:opacity-50"
               style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
             >
-              {busy ? "Legando…" : "Legar y salir"}
+              {busy ? t("transferring") : t("transferSubmit")}
             </button>
           )}
           {step === "close" && (
@@ -209,7 +210,7 @@ export function CreatorExitSheet({
               className="flex-1 py-3 rounded-full text-[13px] font-bold disabled:opacity-40"
               style={{ background: "#E8956B", color: "#241A3D" }}
             >
-              {busy ? "Cerrando…" : "Cerrar comunidad"}
+              {busy ? t("closing") : t("closeSubmit")}
             </button>
           )}
         </div>

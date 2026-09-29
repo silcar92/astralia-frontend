@@ -1,0 +1,16 @@
+{
+ "title": "Your cosmic suggestions",
+ "loading": "Finding today's suggestions…",
+ "done": "You've seen all of today's suggestions. Come back tomorrow for more, or explore Cosmic Storm in the meantime.",
+ "affinity": "affinity",
+ "pass": "Pass",
+ "connect": "Connect",
+ "loadFailed": "We couldn't load your suggestions. Try again.",
+ "decideFailed": "We couldn't record your decision. Try again.",
+ "storm": {
+  "eyebrow": "Unlimited discovery",
+  "subtitle": "Beyond your usual compatibility range",
+  "loading": "Looking for people in the cosmos…",
+  "empty": "There is no one else to discover for now. Come back later as new profiles join."
+ }
+}

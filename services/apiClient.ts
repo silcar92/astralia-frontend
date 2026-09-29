@@ -14,6 +14,12 @@ export class ApiError extends Error {
     this.status = status;
     this.body = body;
   }
+
+  // Código estable que manda el backend ({detail, code}); la interfaz lo traduce, nunca muestra `detail`
+  get code(): string | null {
+    const code = (this.body as { code?: unknown } | null)?.code;
+    return typeof code === "string" ? code : null;
+  }
 }
 
 export function getTokens(): AuthTokens | null {
@@ -57,6 +63,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const tokens = getTokens();
   const buildHeaders = (accessToken?: string): HeadersInit => ({
     "Content-Type": "application/json",
+    ...(typeof document !== "undefined" ? { "Accept-Language": document.documentElement.lang || "es" } : {}),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...init?.headers,
   });

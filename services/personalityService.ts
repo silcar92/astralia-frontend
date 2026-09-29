@@ -1,6 +1,6 @@
 import { apiFetch } from "./apiClient";
 
-export type PersonalityItem = { id: number; dimension: string; text: string };
+export type PersonalityItem = { id: number; key: string; dimension: string; text: string };
 export type PersonalityResult = { mbti_code: string; cosmic_name: string; test_length: string; computed_at: string };
 
 export async function fetchPersonalityItems(length: "short" | "medium" | "full"): Promise<PersonalityItem[]> {

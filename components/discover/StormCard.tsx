@@ -1,14 +1,20 @@
-import { PlacementsRow } from "@/components/astrology/PlacementsRow";
-import type { SuggestionCard } from "@/services/discoveryService";
+"use client";
 
-function distanceLabel(km: number | null): string | null {
-  if (km === null) return null;
-  return km === 0 ? "en tu zona" : `a ${km} km`;
-}
+import { useTranslations } from "next-intl";
+
+import { PlacementsRow } from "@/components/astrology/PlacementsRow";
+import { useCatalog } from "@/hooks/useCatalog";
+import { useExplanation } from "@/lib/explanation";
+import type { SuggestionCard } from "@/services/discoveryService";
 
 export function StormCard({ suggestion }: { suggestion: SuggestionCard }) {
   const score = Math.round(parseFloat(suggestion.compatibility_score));
-  const distance = distanceLabel(suggestion.distance_km);
+  const t = useTranslations("discover");
+  const tc = useTranslations("common");
+  const catalog = useCatalog();
+  const explain = useExplanation();
+  const km = suggestion.distance_km;
+  const distance = km === null ? null : km === 0 ? tc("inYourArea") : tc("km", { km });
 
   return (
     <div className="flex-grow relative">
@@ -60,23 +66,23 @@ export function StormCard({ suggestion }: { suggestion: SuggestionCard }) {
             {score}%
           </span>
           <span className="text-[10px] uppercase tracking-[0.5px]" style={{ color: "#D9C9F0" }}>
-            afinidad
+            {t("affinity")}
           </span>
         </div>
 
         <p className="text-[13px] leading-[1.6] mt-4" style={{ color: "#EFE9F7" }}>
-          {suggestion.explanation}
+          {explain(suggestion.explanation_data, suggestion.explanation)}
         </p>
 
         {suggestion.shared_interests.length > 0 && (
           <div className="flex gap-2 justify-center flex-wrap mt-4">
             {suggestion.shared_interests.map((interest) => (
               <span
-                key={interest}
+                key={interest.code}
                 className="text-[11px] rounded-full px-3.5 py-1.5"
                 style={{ background: "rgba(232,217,181,0.18)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
               >
-                {interest}
+                {catalog.interest(interest)}
               </span>
             ))}
           </div>

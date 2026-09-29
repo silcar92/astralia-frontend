@@ -1,0 +1,10 @@
+{
+ "title": "Mi Galaxia",
+ "loading": "Cargando tu galaxia…",
+ "empty": "Aún no tienes estrellas en tu galaxia. Conéctate con alguien en Discover o Cosmic Storm para que aparezca aquí.",
+ "footer": "El tamaño de tu galaxia no define tu valor personal.",
+ "loadFailed": "No pudimos cargar tu galaxia.",
+ "viewProfileOf": "Ver perfil de {name}",
+ "viewMine": "Ver mi perfil",
+ "you": "Tú"
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
 const MAX_LENGTH = 500;
@@ -15,6 +16,7 @@ export function ComposeSheet({
   onClose: () => void;
   onSubmit: (text: string) => Promise<void>;
 }) {
+  const t = useTranslations("cosmos");
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,7 @@ export function ComposeSheet({
       await onSubmit(trimmed);
       onClose();
     } catch {
-      setError("No pudimos publicar. Intenta de nuevo.");
+      setError(t("publishFailed"));
       setSending(false);
     }
   };
@@ -84,7 +86,7 @@ export function ComposeSheet({
             className="flex-1 py-3 rounded-full text-[13px] font-semibold"
             style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)", color: "var(--astralia-text)" }}
           >
-            Cancelar
+            {t("cancel")}
           </button>
           <button
             type="button"
@@ -93,7 +95,7 @@ export function ComposeSheet({
             className="flex-1 py-3 rounded-full text-[13px] font-bold disabled:opacity-50"
             style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
           >
-            {sending ? "Publicando…" : "Publicar"}
+            {sending ? t("publishing") : t("publish")}
           </button>
         </div>
       </div>

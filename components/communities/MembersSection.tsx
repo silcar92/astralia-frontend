@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -8,11 +9,13 @@ import type { CommunityMember } from "@/services/communityService";
 
 const CHIP = "text-[9px] tracking-[0.5px] uppercase rounded-full px-2 py-0.5";
 
-function since(iso: string): string {
-  return new Intl.DateTimeFormat("es", { month: "short", year: "numeric" }).format(new Date(iso)).replace(".", "");
+function since(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { month: "short", year: "numeric" }).format(new Date(iso)).replace(".", "");
 }
 
 export function MembersSection({ communityId, isCreator }: { communityId: number; isCreator: boolean }) {
+  const locale = useLocale();
+  const t = useTranslations("communities.members");
   const [open, setOpen] = useState(false);
   const [members, setMembers] = useState<CommunityMember[] | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -22,8 +25,8 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
     communityService
       .fetchMembers(communityId)
       .then((res) => setMembers(res.results))
-      .catch(() => setError("No pudimos cargar los miembros."));
-  }, [communityId]);
+      .catch(() => setError(t("loadFailed")));
+  }, [communityId, t]);
 
   useEffect(() => {
     if (open && members === null) load();
@@ -36,14 +39,14 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
       await communityService.setModerator(communityId, member.id, !member.is_moderator);
       load();
     } catch {
-      setError("No pudimos cambiar el rol. Intenta de nuevo.");
+      setError(t("roleFailed"));
     } finally {
       setBusyId(null);
     }
   };
 
   return (
-    <section className="mt-5" aria-label="Miembros">
+    <section className="mt-5" aria-label={t("title")}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -51,7 +54,7 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
         className="w-full flex items-center justify-between rounded-[18px] px-4 py-3 text-[13px]"
         style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)", color: "#EFE9F7" }}
       >
-        <span>Miembros{members ? ` · ${members.length}` : ""}</span>
+        <span>{t("title")}{members ? ` · ${members.length}` : ""}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: open ? "rotate(90deg)" : undefined }}>
           <path d="M9 6l6 6-6 6" />
         </svg>
@@ -66,7 +69,7 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
           )}
           {members === null && !error && (
             <p className="text-xs" style={{ color: "var(--astralia-lilac)" }}>
-              Cargando…
+              {t("loading")}
             </p>
           )}
           {members?.map((member) => (
@@ -75,7 +78,7 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
               <div className="flex-grow min-w-0">
                 <div className="flex items-center gap-1.5">
                   {member.is_me ? (
-                    <span className="text-[13px] font-bold truncate">Tú</span>
+                    <span className="text-[13px] font-bold truncate">{t("you")}</span>
                   ) : (
                     <Link href={`/people/${member.user_id}`} className="text-[13px] font-bold truncate underline-offset-2 hover:underline">
                       {member.user_name}
@@ -83,17 +86,17 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
                   )}
                   {member.is_creator && (
                     <span className={CHIP} style={{ background: "rgba(232,217,181,0.2)", color: "#F3E9C8" }}>
-                      Creador
+                      {t("creator")}
                     </span>
                   )}
                   {member.is_moderator && !member.is_creator && (
                     <span className={CHIP} style={{ background: "rgba(185,168,222,0.2)", color: "#D9C9F0" }}>
-                      Moderador
+                      {t("moderator")}
                     </span>
                   )}
                 </div>
                 <div className="text-[10px]" style={{ color: "#B9A8DE" }}>
-                  Desde {since(member.joined_at)}
+                  {t("since", { date: since(member.joined_at, locale) })}
                 </div>
               </div>
               {isCreator && !member.is_creator && (
@@ -104,7 +107,7 @@ export function MembersSection({ communityId, isCreator }: { communityId: number
                   className="text-[10px] font-semibold rounded-full px-3 py-1.5 disabled:opacity-50"
                   style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)", color: "var(--astralia-text)" }}
                 >
-                  {member.is_moderator ? "Quitar moderador" : "Nombrar moderador"}
+                  {member.is_moderator ? t("removeModerator") : t("makeModerator")}
                 </button>
               )}
             </div>

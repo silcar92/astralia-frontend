@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -7,20 +8,22 @@ import Link from "next/link";
 import { BottomNav } from "@/components/BottomNav";
 import { BellButton } from "@/components/ui/BellButton";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as chatService from "@/services/chatService";
 import type { Conversation } from "@/services/chatService";
 
-function timeLabel(iso: string): string {
+function timeLabel(iso: string, locale: string): string {
   const date = new Date(iso);
-  const now = new Date();
-  const sameDay = date.toDateString() === now.toDateString();
-  if (sameDay) return new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(date);
-  return new Intl.DateTimeFormat("es", { day: "numeric", month: "short" }).format(date);
+  const sameDay = date.toDateString() === new Date().toDateString();
+  return new Intl.DateTimeFormat(locale, sameDay ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short" }).format(date);
 }
 
 export default function ChatsPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("chat");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [conversations, setConversations] = useState<Conversation[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,13 +42,8 @@ export default function ChatsPage() {
     chatService
       .fetchConversations()
       .then((res) => setConversations(res.results))
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar tus chats.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   return (
@@ -55,7 +53,7 @@ export default function ChatsPage() {
           className="text-[26px] font-semibold italic"
           style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}
         >
-          Chats
+          {t("title")}
         </div>
         <BellButton />
       </div>
@@ -71,21 +69,21 @@ export default function ChatsPage() {
             className="text-xs rounded-full px-4 py-2"
             style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
           >
-            Reintentar
+            {tc("retry")}
           </button>
         </div>
       )}
 
       {!error && conversations === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando tus chats…
+          {t("loading")}
         </p>
       )}
 
       {!error && conversations !== null && conversations.length === 0 && (
         <div className="flex-grow flex items-center justify-center text-center px-6">
           <p className="text-sm" style={{ color: "var(--astralia-lilac)" }}>
-            El chat se desbloquea cuando conectas con alguien. Ve a Discover o Cosmic Storm para empezar.
+            {t("locked")}
           </p>
         </div>
       )}
@@ -119,12 +117,12 @@ export default function ChatsPage() {
                   </span>
                   {c.last_message && (
                     <span className="text-[10px] shrink-0" style={{ color: "var(--astralia-lilac)" }}>
-                      {timeLabel(c.last_message.sent_at)}
+                      {timeLabel(c.last_message.sent_at, locale)}
                     </span>
                   )}
                 </div>
                 <p className="text-xs truncate mt-0.5" style={{ color: c.unread_count > 0 ? "#F3E9C8" : "var(--astralia-lilac)" }}>
-                  {c.last_message ? c.last_message.text : "Aún no hay mensajes -- salúdala/lo primero."}
+                  {c.last_message ? c.last_message.text : t("noMessages")}
                 </p>
               </div>
 

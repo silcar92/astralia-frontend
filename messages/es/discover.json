@@ -1,0 +1,16 @@
+{
+ "title": "Tus sugerencias cósmicas",
+ "loading": "Buscando tus sugerencias de hoy…",
+ "done": "Ya viste todas tus sugerencias de hoy. Vuelve mañana por más, o explora Cosmic Storm mientras tanto.",
+ "affinity": "afinidad",
+ "pass": "Pasar",
+ "connect": "Conectar",
+ "loadFailed": "No pudimos cargar tus sugerencias. Intenta de nuevo.",
+ "decideFailed": "No pudimos registrar tu decisión. Intenta de nuevo.",
+ "storm": {
+  "eyebrow": "Descubrimiento ilimitado",
+  "subtitle": "Más allá de tu rango habitual de compatibilidad",
+  "loading": "Buscando personas en el cosmos…",
+  "empty": "Por ahora no hay más personas por descubrir. Vuelve más tarde, a medida que se sumen nuevos perfiles."
+ }
+}

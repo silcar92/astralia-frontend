@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,14 +8,17 @@ import { BottomNav } from "@/components/BottomNav";
 import { SuggestionCard } from "@/components/discover/SuggestionCard";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as discoveryService from "@/services/discoveryService";
 import type { SuggestionCard as SuggestionCardType } from "@/services/discoveryService";
 
-const TODAY = new Intl.DateTimeFormat("es", { day: "numeric", month: "long" }).format(new Date());
-
 export default function DiscoverPage() {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("discover");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
+  const today = new Intl.DateTimeFormat(locale, { day: "numeric", month: "long" }).format(new Date());
   const { status } = useAuth();
   const [suggestions, setSuggestions] = useState<SuggestionCardType[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,13 +41,8 @@ export default function DiscoverPage() {
       .then((res) => {
         setSuggestions(res.results.filter((s) => s.action === "pending"));
       })
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al buscar tus sugerencias.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   const current = suggestions?.[index];
@@ -63,7 +62,7 @@ export default function DiscoverPage() {
     <main className="flex min-h-screen flex-col px-[22px] pt-8" style={{ fontFamily: "var(--font-sans)" }}>
       <div className="flex items-center justify-between">
         <span className="text-[11px] tracking-[2px] uppercase" style={{ color: "var(--astralia-lilac)" }}>
-          {TODAY}
+          {today}
         </span>
         <HeaderActions />
       </div>
@@ -72,7 +71,7 @@ export default function DiscoverPage() {
         className="mt-2.5 mb-5 text-[27px] font-semibold italic text-center"
         style={{ fontFamily: "var(--font-serif)", color: "var(--astralia-text)" }}
       >
-        Tus sugerencias cósmicas
+        {t("title")}
       </h1>
 
       {error && (
@@ -86,21 +85,21 @@ export default function DiscoverPage() {
             className="text-xs rounded-full px-4 py-2"
             style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
           >
-            Reintentar
+            {tc("retry")}
           </button>
         </div>
       )}
 
       {!error && suggestions === null && (
         <p className="text-center text-sm mt-10" style={{ color: "var(--astralia-lilac)" }}>
-          Buscando tus sugerencias de hoy…
+          {t("loading")}
         </p>
       )}
 
       {!error && suggestions !== null && !current && (
         <div className="flex-grow flex items-center justify-center text-center px-4">
           <p className="text-sm" style={{ color: "var(--astralia-lilac)" }}>
-            Ya viste todas tus sugerencias de hoy. Vuelve mañana por más, o explora Cosmic Storm mientras tanto.
+            {t("done")}
           </p>
         </div>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import type { GalaxyStar } from "@/services/galaxyService";
@@ -41,6 +42,7 @@ function layout(stars: GalaxyStar[]) {
 
 export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
   const router = useRouter();
+  const t = useTranslations("galaxy");
   const placed = layout(stars);
 
   return (
@@ -76,7 +78,7 @@ export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
             key={star.id}
             role="link"
             tabIndex={0}
-            aria-label={`Ver perfil de ${star.name}`}
+            aria-label={t("viewProfileOf", { name: star.name })}
             style={{ cursor: "pointer" }}
             onClick={() => router.push(`/people/${star.other_user_id}`)}
             onKeyDown={(e) => {
@@ -113,7 +115,7 @@ export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
       <g
         role="link"
         tabIndex={0}
-        aria-label="Ver mi perfil"
+        aria-label={t("viewMine")}
         style={{ cursor: "pointer" }}
         onClick={() => router.push("/profile")}
         onKeyDown={(e) => {
@@ -124,7 +126,7 @@ export function GalaxyChart({ stars }: { stars: GalaxyStar[] }) {
         <circle cx={CENTER.x} cy={CENTER.y} r="20" fill={GOLD} opacity="0.18" />
         <use href="#star5" fill={GOLD} stroke="#F3E9C8" strokeWidth="0.4" transform={`translate(${CENTER.x},${CENTER.y}) scale(13)`} />
         <text x={CENTER.x} y={CENTER.y + 30} textAnchor="middle" fontFamily="Cormorant Garamond" fontSize="14" fontWeight="600" fill="#F3E9C8">
-          Tú
+          {t("you")}
         </text>
       </g>
     </svg>

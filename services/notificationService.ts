@@ -3,6 +3,8 @@ import { apiFetch } from "./apiClient";
 export type AppNotification = {
   id: number;
   type: string;
+  code: string;
+  params: Record<string, string>;
   body: string;
   target_type: string;
   target_id: number | null;

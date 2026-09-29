@@ -1,0 +1,16 @@
+{
+ "title": "Chats",
+ "loading": "Loading your chats…",
+ "locked": "Chat unlocks when you connect with someone. Head to Discover or Cosmic Storm to get started.",
+ "noMessages": "No messages yet. Say hi first!",
+ "loadFailed": "We couldn't load your chats.",
+ "conversation": {
+  "title": "Chat",
+  "back": "Back to chats",
+  "loading": "Loading conversation…",
+  "empty": "No messages yet. This is the start of the conversation.",
+  "placeholder": "Write a message…",
+  "send": "Send",
+  "loadFailed": "We couldn't load the conversation."
+ }
+}

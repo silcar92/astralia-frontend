@@ -1,0 +1,49 @@
+{
+ "birth": {
+  "step": "Step 1 of 4",
+  "title": "Your moment in the sky",
+  "intro": "We need your birth date, time and place to calculate your natal chart.",
+  "birthDate": "Birth date",
+  "birthTime": "Birth time (optional)",
+  "city": "City of birth",
+  "country": "Country of birth",
+  "consent": "I explicitly consent to Astralia processing my birth data and calculating my natal chart.",
+  "consentRequired": "We need your consent to calculate your natal chart.",
+  "cityNotFound": "We couldn't find that city. Check the spelling.",
+  "geoFailed": "We couldn't work out your location. Please try again.",
+  "submit": "Continue",
+  "submitting": "Locating…",
+  "livesSame": "I live in my city of birth",
+  "livesTitle": "Where do you live now?"
+ },
+ "location": {
+  "hint": "We use it to show your city and calculate approximate distances. We never show your exact location.",
+  "city": "City where you live",
+  "country": "Country where you live",
+  "useMine": "Use my location",
+  "locating": "Locating…",
+  "denied": "We couldn't access your location. Type your city and country.",
+  "notFound": "We couldn't find that city. Check the spelling.",
+  "found": "Detected location: {place}"
+ },
+ "preferences": {
+  "step": "Step 2 of 4",
+  "title": "What moves you",
+  "interests": "Interests",
+  "goals": "What kind of friendship are you looking for?",
+  "depth": "Conversation depth",
+  "group": "You prefer to spend time in…",
+  "back": "Back",
+  "continue": "Continue"
+ },
+ "page": {
+  "saving": "Saving your profile…",
+  "saveFailed": "We couldn't save your profile. Please try again."
+ },
+ "reveal": {
+  "step": "Step 4 of 4",
+  "title": "Your cosmic profile is ready",
+  "disclaimer": "Astrology on Astralia is a framework for self-knowledge and compatibility, not a scientific or deterministic prediction.",
+  "enter": "Enter Astralia"
+ }
+}

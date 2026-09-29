@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { relativeTime } from "@/lib/time";
@@ -13,6 +14,8 @@ export function MembershipRequests({
   communityId: number;
   onDecided: (approved: boolean) => void;
 }) {
+  const locale = useLocale();
+  const t = useTranslations("communities.requests");
   const [requests, setRequests] = useState<MembershipRequest[] | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,7 @@ export function MembershipRequests({
     communityService
       .fetchRequests(communityId)
       .then((res) => setRequests(res.results))
-      .catch(() => setError("No pudimos cargar las solicitudes."));
+      .catch(() => setError(t("loadFailed")));
   }, [communityId]);
 
   const decide = async (request: MembershipRequest, action: "approve" | "reject") => {
@@ -32,7 +35,7 @@ export function MembershipRequests({
       setRequests((prev) => prev?.filter((r) => r.id !== request.id) ?? null);
       onDecided(action === "approve");
     } catch {
-      setError("No pudimos registrar tu decisión. Intenta de nuevo.");
+      setError(t("decideFailed"));
     } finally {
       setBusyId(null);
     }
@@ -44,10 +47,10 @@ export function MembershipRequests({
     <section
       className="mt-5 rounded-[20px] p-3.5"
       style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(232,217,181,0.3)" }}
-      aria-label="Solicitudes pendientes"
+      aria-label={t("title")}
     >
       <div className="text-[10px] tracking-[1px] uppercase mb-2.5" style={{ color: "#E8D9B5" }}>
-        Solicitudes pendientes{requests ? ` · ${requests.length}` : ""}
+        {t("title")}{requests ? ` · ${requests.length}` : ""}
       </div>
       {error && (
         <p className="text-xs mb-2" style={{ color: "var(--astralia-alert)" }}>
@@ -56,7 +59,7 @@ export function MembershipRequests({
       )}
       {requests === null && !error && (
         <p className="text-xs" style={{ color: "var(--astralia-lilac)" }}>
-          Cargando…
+          {t("loading")}
         </p>
       )}
       <div className="flex flex-col gap-2.5">
@@ -66,7 +69,7 @@ export function MembershipRequests({
             <div className="flex-grow min-w-0">
               <div className="text-[13px] font-bold truncate">{request.user_name}</div>
               <div className="text-[10px]" style={{ color: "#B9A8DE" }}>
-                {relativeTime(request.requested_at)}
+                {relativeTime(request.requested_at, locale)}
               </div>
             </div>
             <button
@@ -76,7 +79,7 @@ export function MembershipRequests({
               className="text-[11px] font-semibold rounded-full px-3 py-1.5 disabled:opacity-50"
               style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)", color: "var(--astralia-text)" }}
             >
-              Rechazar
+              {t("reject")}
             </button>
             <button
               type="button"
@@ -85,7 +88,7 @@ export function MembershipRequests({
               className="text-[11px] font-bold rounded-full px-3 py-1.5 disabled:opacity-50"
               style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
             >
-              Aprobar
+              {t("approve")}
             </button>
           </div>
         ))}

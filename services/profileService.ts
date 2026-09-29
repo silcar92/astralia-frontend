@@ -1,6 +1,7 @@
 import { apiFetch } from "./apiClient";
+import type { Profile } from "./authService";
 
-export type Interest = { id: number; name: string; category: string };
+export type Interest = { id: number; code: string; name: string; category: string };
 export type FriendshipGoal = { id: number; code: string; label: string };
 
 export function fetchInterests(): Promise<{ results: Interest[] }> {
@@ -36,11 +37,31 @@ export function createProfile(payload: CreateProfilePayload) {
   });
 }
 
+export type UpdateProfilePayload = Partial<{
+  name: string;
+  bio: string;
+  language: string;
+  city: string;
+  country: string;
+  current_latitude: number;
+  current_longitude: number;
+  interests: number[];
+  friendship_goals: number[];
+  conversation_depth: string;
+  group_preference: string;
+  birth_time: string | null;
+  birth_place: string;
+  birth_latitude: number;
+  birth_longitude: number;
+  birth_timezone: string;
+}>;
+
+export function updateProfile(payload: UpdateProfilePayload) {
+  return apiFetch<Profile>("/api/v1/accounts/profile/me/", { method: "PATCH", body: JSON.stringify(payload) });
+}
+
 export function updateBio(bio: string) {
-  return apiFetch<{ bio: string }>("/api/v1/accounts/profile/me/", {
-    method: "PATCH",
-    body: JSON.stringify({ bio }),
-  });
+  return updateProfile({ bio });
 }
 
 export type ConnectionState = {
@@ -59,11 +80,13 @@ export type PublicProfile =
       country: string;
       bio: string;
       interest_names: string[];
-      shared_interests: string[];
+      interest_items: { code: string; name: string }[];
+      shared_interests: { code: string; name: string }[];
       chart_highlights: { sun?: string; moon?: string; ascendant?: string };
       cosmic_name: string | null;
       compatibility_pct: number;
       explanation: string;
+      explanation_data?: { dimension?: string; shared?: { code: string; name: string }[] } | null;
       connection: ConnectionState;
     };
 

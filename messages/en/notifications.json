@@ -1,0 +1,36 @@
+{
+ "title": "Notifications",
+ "markAll": "Mark all",
+ "loading": "Loading your notifications…",
+ "empty": "You have no notifications yet. Your connections and messages will show up here.",
+ "loadFailed": "We couldn't load your notifications.",
+ "groups": {
+  "today": "Today",
+  "week": "This week",
+  "before": "Earlier"
+ },
+ "accept": "Accept",
+ "accepted": "Request accepted.",
+ "handled": "Request already handled.",
+ "acceptFailed": "We couldn't accept the request. Try again.",
+ "messages": {
+  "connection_request": "{name} wants to connect with you.",
+  "connection_accepted_mine": "You connected with {name}: they now shine in your Galaxy.",
+  "connection_accepted_theirs": "{name} accepted your connection — they now shine in your Galaxy.",
+  "new_message": "{name} sent you a message.",
+  "membership_approved": "You're now part of {community}.",
+  "moderator_promoted": "You're now a moderator of {community}.",
+  "moderator_demoted": "You're no longer a moderator of {community}.",
+  "owner_handed_to_you": "{name} handed {community} over to you: you're now its creator.",
+  "owner_handed_over": "{name} handed {community} over to {to}, its new creator.",
+  "community_closed": "{community} was closed by its creator and is now disabled.",
+  "owner_auto_new": "The creator left {community}: you're now its creator.",
+  "owner_auto_changed": "{community} has a new creator: {to}.",
+  "event_waitlist_promoted": "A spot opened up: you're now confirmed for {event}.",
+  "event_cancelled": "The event {event} was cancelled.",
+  "verification_approved": "Your identity verification was approved.",
+  "verification_rejected": "Your identity verification was rejected. Check the details and try again.",
+  "age_segment_changed": "You're now in the 18+ group. Your connections, communities and events from the 16-17 group are no longer available.",
+  "connection_ended": "One of your connections is no longer available."
+ }
+}

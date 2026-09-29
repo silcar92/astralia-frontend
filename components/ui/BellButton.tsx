@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -8,6 +9,7 @@ import * as notificationService from "@/services/notificationService";
 
 export function BellButton() {
   const { status } = useAuth();
+  const t = useTranslations("common");
   const [hasAlert, setHasAlert] = useState(false);
 
   useEffect(() => {
@@ -21,7 +23,7 @@ export function BellButton() {
   return (
     <Link
       href="/notifications"
-      aria-label="Notificaciones"
+      aria-label={t("notifications")}
       className="w-[34px] h-[34px] rounded-full flex items-center justify-center relative"
       style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(232,217,181,0.35)", color: "#E8D9B5" }}
     >

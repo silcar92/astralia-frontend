@@ -1,24 +1,28 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as chatService from "@/services/chatService";
 import type { ChatMessage, Conversation } from "@/services/chatService";
 
 const POLL_MS = 4000;
 
-function timeLabel(iso: string): string {
-  return new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+function timeLabel(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 }
 
 export default function ChatConversationPage() {
   const params = useParams<{ connectionId: string }>();
   const connectionId = Number(params.connectionId);
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations("chat.conversation");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
@@ -49,12 +53,7 @@ export default function ChatConversationPage() {
           if (!cancelled) setMessages(res.results);
         })
         .catch((err) => {
-          if (cancelled) return;
-          const message =
-            err instanceof ApiError
-              ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar la conversación.`
-              : "No pudimos conectar con el servidor. Intenta de nuevo.";
-          setError(message);
+          if (!cancelled) setError(errorMessage(err, "loadFailed"));
         });
     };
 
@@ -67,6 +66,7 @@ export default function ChatConversationPage() {
       cancelled = true;
       clearInterval(interval);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router, connectionId]);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function ChatConversationPage() {
       >
         <Link
           href="/chats"
-          aria-label="Volver a chats"
+          aria-label={t("back")}
           className="w-[32px] h-[32px] rounded-full flex items-center justify-center"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(232,217,181,0.35)", color: "#E8D9B5" }}
         >
@@ -110,7 +110,7 @@ export default function ChatConversationPage() {
         {conversation ? (
           <Link
             href={`/people/${conversation.other_user_id}`}
-            aria-label={`Ver perfil de ${conversation.other_user_name}`}
+            aria-label={conversation.other_user_name}
             className="text-[18px] font-semibold italic"
             style={{ fontFamily: "var(--font-serif)" }}
           >
@@ -118,7 +118,7 @@ export default function ChatConversationPage() {
           </Link>
         ) : (
           <span className="text-[18px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
-            Chat
+            {t("title")}
           </span>
         )}
       </div>
@@ -132,13 +132,13 @@ export default function ChatConversationPage() {
 
         {!error && messages === null && (
           <p className="text-center text-sm mt-6" style={{ color: "var(--astralia-lilac)" }}>
-            Cargando conversación…
+            {t("loading")}
           </p>
         )}
 
         {!error && messages !== null && messages.length === 0 && (
           <p className="text-center text-sm mt-6 px-6" style={{ color: "var(--astralia-lilac)" }}>
-            Todavía no hay mensajes. Este es el comienzo de la conversación.
+            {t("empty")}
           </p>
         )}
 
@@ -154,7 +154,7 @@ export default function ChatConversationPage() {
               >
                 <p className="text-sm">{m.text}</p>
                 <span className="block text-[10px] mt-1 text-right" style={{ color: "var(--astralia-lilac)" }}>
-                  {timeLabel(m.sent_at)}
+                  {timeLabel(m.sent_at, locale)}
                 </span>
               </div>
             </div>
@@ -172,7 +172,7 @@ export default function ChatConversationPage() {
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSend();
           }}
-          placeholder="Escribe un mensaje…"
+          placeholder={t("placeholder")}
           className="flex-grow rounded-full px-4 py-2.5 text-sm outline-none"
           style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "var(--astralia-text)" }}
         />
@@ -180,7 +180,7 @@ export default function ChatConversationPage() {
           type="button"
           onClick={handleSend}
           disabled={sending || !draft.trim()}
-          aria-label="Enviar"
+          aria-label={t("send")}
           className="w-[40px] h-[40px] shrink-0 rounded-full flex items-center justify-center disabled:opacity-50"
           style={{ background: "var(--astralia-gold)", color: "#221A3B" }}
         >

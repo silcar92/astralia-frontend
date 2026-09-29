@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -7,12 +8,15 @@ import { BottomNav } from "@/components/BottomNav";
 import { GalaxyChart } from "@/components/galaxy/GalaxyChart";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { useAuth } from "@/hooks/useAuth";
-import { ApiError } from "@/services/apiClient";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as galaxyService from "@/services/galaxyService";
 import type { GalaxyStar } from "@/services/galaxyService";
 
 export default function MyGalaxyPage() {
   const router = useRouter();
+  const t = useTranslations("galaxy");
+  const tc = useTranslations("common");
+  const errorMessage = useErrorMessage();
   const { status } = useAuth();
   const [stars, setStars] = useState<GalaxyStar[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +35,8 @@ export default function MyGalaxyPage() {
     galaxyService
       .fetchGalaxy()
       .then((res) => setStars(res.results))
-      .catch((err) => {
-        const message =
-          err instanceof ApiError
-            ? (err.body as { detail?: string })?.detail ?? `Error ${err.status} al cargar tu galaxia.`
-            : "No pudimos conectar con el servidor. Intenta de nuevo.";
-        setError(message);
-      });
+      .catch((err) => setError(errorMessage(err, "loadFailed")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
   return (
@@ -54,7 +53,7 @@ export default function MyGalaxyPage() {
     >
       <div className="flex items-center justify-between">
         <div style={{ fontFamily: "var(--font-serif)", fontSize: 26, fontWeight: 600, fontStyle: "italic" }}>
-          Mi Galaxia
+          {t("title")}
         </div>
         <HeaderActions />
       </div>
@@ -71,14 +70,14 @@ export default function MyGalaxyPage() {
               className="text-xs rounded-full px-4 py-2"
               style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
             >
-              Reintentar
+              {tc("retry")}
             </button>
           </div>
         )}
 
         {!error && stars === null && (
           <p className="absolute inset-0 flex items-center justify-center text-center text-sm px-8" style={{ color: "var(--astralia-lilac)" }}>
-            Cargando tu galaxia…
+            {t("loading")}
           </p>
         )}
 
@@ -87,7 +86,7 @@ export default function MyGalaxyPage() {
             className="absolute inset-x-0 text-center text-sm px-8"
             style={{ color: "var(--astralia-lilac)", top: "66%" }}
           >
-            Aún no tienes estrellas en tu galaxia. Conéctate con alguien en Discover o Cosmic Storm para que aparezca aquí.
+            {t("empty")}
           </p>
         )}
 
@@ -104,7 +103,7 @@ export default function MyGalaxyPage() {
           padding: "10px 20px 0 20px",
         }}
       >
-        El tamaño de tu galaxia no define tu valor personal.
+        {t("footer")}
       </div>
 
       <BottomNav active="/galaxy" />
