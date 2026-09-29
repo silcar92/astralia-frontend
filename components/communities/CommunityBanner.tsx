@@ -30,10 +30,10 @@ const BANNERS = [
   },
 ];
 
-export function CommunityBanner({ id, height = 76 }: { id: number; height?: number }) {
+export function CommunityBanner({ id, height = 76, disabled = false }: { id: number; height?: number; disabled?: boolean }) {
   const banner = BANNERS[id % BANNERS.length];
   return (
-    <div className="flex items-center justify-center" style={{ height, background: banner.background, color: banner.color }}>
+    <div className="flex items-center justify-center" style={{ height, background: banner.background, color: banner.color, filter: disabled ? "grayscale(1)" : undefined }}>
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={banner.stroke} aria-hidden="true">
         {banner.icon}
       </svg>

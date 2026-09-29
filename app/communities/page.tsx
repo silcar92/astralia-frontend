@@ -148,7 +148,29 @@ export default function CommunitiesPage() {
       )}
 
       <div className="flex flex-col gap-3.5">
-        {visible.map((community) => (
+        {visible.map((community) =>
+          community.closed_at ? (
+            <div
+              key={community.id}
+              aria-disabled="true"
+              className="relative rounded-[20px] overflow-hidden select-none"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)", filter: "grayscale(1)", opacity: 0.55 }}
+            >
+              <CommunityBanner id={community.id} disabled />
+              <div className="p-3.5 pr-[120px]">
+                <div className="text-sm font-bold truncate">{community.name}</div>
+                <div className="text-[11px] mt-0.5" style={{ color: "#B9A8DE" }}>
+                  {memberLabel(community.member_count, community.visibility)}
+                </div>
+              </div>
+              <span
+                className="absolute right-3.5 bottom-3.5 px-4 py-2 rounded-full text-[11px] font-bold"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)" }}
+              >
+                Cerrada
+              </span>
+            </div>
+          ) : (
           <div
             key={community.id}
             className="relative rounded-[20px] overflow-hidden"
@@ -167,7 +189,8 @@ export default function CommunitiesPage() {
               <JoinButton community={community} busy={busyId === community.id} onJoin={() => handleJoin(community)} />
             </div>
           </div>
-        ))}
+          )
+        )}
       </div>
 
       <BottomNav active="/communities" />

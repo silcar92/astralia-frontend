@@ -6,7 +6,9 @@ import { useParams, useRouter } from "next/navigation";
 
 import { BottomNav } from "@/components/BottomNav";
 import { CommunityBanner, memberLabel } from "@/components/communities/CommunityBanner";
+import { CreatorExitSheet } from "@/components/communities/CreatorExitSheet";
 import { JoinButton } from "@/components/communities/JoinButton";
+import { MembersSection } from "@/components/communities/MembersSection";
 import { MembershipRequests } from "@/components/communities/MembershipRequests";
 import { ComposeSheet } from "@/components/cosmos/ComposeSheet";
 import { PostCard } from "@/components/cosmos/PostCard";
@@ -29,9 +31,10 @@ export default function CommunityDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [composing, setComposing] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const handleToggleLike = usePostLikes(setPosts);
 
-  const isMember = community?.my_status === "approved";
+  const isMember = community?.my_status === "approved" && !community?.closed_at;
 
   useEffect(() => {
     if (status === "loading") return;
@@ -133,7 +136,7 @@ export default function CommunityDetailPage() {
       {community && (
         <>
           <div className="mt-5 rounded-[20px] overflow-hidden" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(232,217,181,0.3)" }}>
-            <CommunityBanner id={community.id} />
+            <CommunityBanner id={community.id} disabled={!!community.closed_at} />
             <div className="p-3.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
@@ -142,7 +145,13 @@ export default function CommunityDetailPage() {
                     {memberLabel(community.member_count, community.visibility)}
                   </div>
                 </div>
-                <JoinButton community={community} busy={busy} onJoin={handleJoin} />
+                {community.closed_at ? (
+                  <span className="px-4 py-2 rounded-full text-[11px] font-bold" style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.25)" }}>
+                    Cerrada
+                  </span>
+                ) : (
+                  <JoinButton community={community} busy={busy} onJoin={handleJoin} />
+                )}
               </div>
               {community.description && (
                 <p className="text-xs leading-[1.5] mt-3" style={{ color: "#EFE9F7" }}>
@@ -152,7 +161,13 @@ export default function CommunityDetailPage() {
             </div>
           </div>
 
-          {community.is_moderator && (
+          {community.closed_at && (
+            <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
+              Esta comunidad fue cerrada por su creador y ya no está disponible.
+            </p>
+          )}
+
+          {community.is_moderator && !community.closed_at && (
             <>
               <Link
                 href={`/events/new?community=${community.id}`}
@@ -182,6 +197,8 @@ export default function CommunityDetailPage() {
 
           {isMember ? (
             <>
+              <MembersSection communityId={community.id} isCreator={community.is_creator} />
+
               <button
                 type="button"
                 onClick={() => setComposing(true)}
@@ -209,19 +226,17 @@ export default function CommunityDetailPage() {
                 </div>
               )}
 
-              {!community.is_moderator && (
               <button
                 type="button"
-                onClick={handleLeave}
+                onClick={community.is_creator ? () => setExiting(true) : handleLeave}
                 disabled={busy}
                 className="text-[11px] underline underline-offset-2 mt-8 self-center"
                 style={{ color: "#8E7FB0" }}
               >
-                Salir de la comunidad
+                {community.is_creator ? "Dejar la comunidad…" : "Salir de la comunidad"}
               </button>
-              )}
             </>
-          ) : (
+          ) : community.closed_at ? null : (
             <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
               {community.my_status === "pending"
                 ? "Tu solicitud está pendiente. Te avisaremos cuando te aprueben."
@@ -232,6 +247,10 @@ export default function CommunityDetailPage() {
       )}
 
       <BottomNav active="/communities" />
+
+      {exiting && community && (
+        <CreatorExitSheet community={community} onClose={() => setExiting(false)} onDone={() => router.replace("/communities")} />
+      )}
 
       {composing && (
         <ComposeSheet
