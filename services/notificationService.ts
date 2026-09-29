@@ -6,6 +6,7 @@ export type AppNotification = {
   body: string;
   target_type: string;
   target_id: number | null;
+  connection_status: "pending" | "connected" | "disconnected" | "removed" | null;
   read_at: string | null;
   created_at: string;
 };

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { PlacementsRow } from "@/components/astrology/PlacementsRow";
 import { BottomNav } from "@/components/BottomNav";
+import { BackButton } from "@/components/ui/BackButton";
 import { useAuth } from "@/hooks/useAuth";
 import * as astrologyService from "@/services/astrologyService";
 import type { NatalChart } from "@/services/astrologyService";
@@ -93,16 +93,7 @@ export default function ProfilePage() {
   return (
     <main className="flex min-h-screen flex-col px-[22px] pt-[30px]" style={{ fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}>
       <div className="flex items-center justify-between relative">
-        <Link
-          href="/galaxy"
-          aria-label="Volver"
-          className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.2)" }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </Link>
+        <BackButton fallback="/galaxy" />
         <div className="text-[19px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
           Mi Perfil
         </div>

@@ -122,9 +122,10 @@ export default function NotificationsPage() {
       if (!alreadyHandled) setError("No pudimos aceptar la solicitud. Intenta de nuevo.");
     }
     if (!n.read_at) {
-      notificationService.markRead(n.id).catch(() => {});
-      setItems((prev) => prev?.map((i) => (i.id === n.id ? { ...i, read_at: new Date().toISOString() } : i)) ?? null);
+      await notificationService.markRead(n.id).catch(() => {});
     }
+    // recarga la lista para que aparezca el aviso "Te conectaste con ..." que se genera al aceptar
+    notificationService.fetchNotifications().then((res) => setItems(res.results)).catch(() => {});
   };
 
   const handleMarkAll = () => {
@@ -186,7 +187,10 @@ export default function NotificationsPage() {
             <div className="flex flex-col gap-2.5">
               {group.list.map((n) => {
                 const unread = !n.read_at;
-                const state = accepted[n.id];
+                // el estado real viene del servidor: Aceptar solo se ofrece mientras la solicitud siga pendiente
+                const fromServer: "ok" | "done" | undefined =
+                  n.connection_status === "connected" ? "ok" : n.connection_status === "pending" || n.connection_status === null ? undefined : "done";
+                const state = accepted[n.id] ?? fromServer;
                 return (
                   <div
                     key={n.id}
@@ -224,7 +228,7 @@ export default function NotificationsPage() {
                       <div className="px-3 pb-3 pl-[60px]">
                         {state === "ok" || state === "done" ? (
                           <span className="text-[11px]" style={{ color: "#E8D9B5" }}>
-                            {state === "ok" ? "Conectados — ya brilla en tu Galaxia." : "Solicitud ya atendida."}
+                            {state === "ok" ? "Solicitud aceptada." : "Solicitud ya atendida."}
                           </span>
                         ) : (
                           <button
