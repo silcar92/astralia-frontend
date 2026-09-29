@@ -24,6 +24,14 @@ export function PlacementsRow({
   ascendant?: string;
   compact?: boolean;
 }) {
+  if (!sun && !moon && !ascendant) {
+    return (
+      <p className="text-[11px] leading-[1.5] text-center px-3" style={{ color: "#B9A8DE" }}>
+        La carta natal todavía no está disponible.
+      </p>
+    );
+  }
+
   return (
     <div className="flex justify-between gap-1.5 w-full">
       <Column glyph={<SunGlyph />} label="Sol" sign={sun} compact={compact} />
