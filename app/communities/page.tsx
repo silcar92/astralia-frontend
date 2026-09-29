@@ -17,7 +17,7 @@ type Tab = "mine" | "explore";
 
 export default function CommunitiesPage() {
   const router = useRouter();
-  const { status } = useAuth();
+  const { status, profile } = useAuth();
   const [communities, setCommunities] = useState<Community[] | null>(null);
   const [tab, setTab] = useState<Tab | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +82,18 @@ export default function CommunitiesPage() {
         <div className="text-[26px] font-semibold italic" style={{ fontFamily: "var(--font-serif)" }}>
           Comunidades
         </div>
-        <BellButton />
+        <div className="flex items-center gap-2.5">
+          {profile?.is_approved_community_creator && (
+            <Link
+              href="/communities/new"
+              className="text-[11px] font-bold rounded-full px-3.5 py-2"
+              style={{ background: "linear-gradient(135deg,#E8D9B5,#C9A86B)", color: "#241A3D" }}
+            >
+              + Crear
+            </Link>
+          )}
+          <BellButton />
+        </div>
       </div>
 
       <div className="flex gap-2 mt-[18px] mb-5" role="tablist">
@@ -107,6 +118,13 @@ export default function CommunitiesPage() {
             </button>
           );
         })}
+        <Link
+          href="/events"
+          className="flex-1 text-center py-2.5 rounded-[14px] text-xs"
+          style={{ border: "1px solid rgba(255,255,255,0.15)", color: "#B9A8DE" }}
+        >
+          Eventos
+        </Link>
       </div>
 
       {error && (

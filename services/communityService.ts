@@ -11,6 +11,8 @@ export type Community = {
   age_segment: "youth" | "adult";
   member_count: number;
   my_status: MembershipStatus;
+  is_moderator: boolean;
+  pending_count: number | null;
   created_at: string;
 };
 
@@ -30,4 +32,25 @@ export function joinCommunity(id: number): Promise<{ status: Exclude<MembershipS
 
 export function leaveCommunity(id: number): Promise<void> {
   return apiFetch(`/api/v1/communities/${id}/leave/`, { method: "POST" });
+}
+
+export function createCommunity(payload: {
+  name: string;
+  description: string;
+  visibility: "public" | "private";
+}): Promise<Community> {
+  return apiFetch("/api/v1/communities/", { method: "POST", body: JSON.stringify(payload) });
+}
+
+export type MembershipRequest = { id: number; user_name: string; requested_at: string };
+
+export function fetchRequests(communityId: number): Promise<Paginated<MembershipRequest>> {
+  return apiFetch(`/api/v1/communities/${communityId}/requests/?page_size=100`);
+}
+
+export function decideRequest(communityId: number, membershipId: number, action: "approve" | "reject") {
+  return apiFetch<{ id: number; status: string }>(`/api/v1/communities/${communityId}/requests/${membershipId}/`, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
 }

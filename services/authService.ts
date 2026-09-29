@@ -26,6 +26,7 @@ export type Profile = {
   tier: "free" | "cosmic" | "nebula";
   verification_status: "pending" | "approved" | "rejected";
   bio: string;
+  is_approved_community_creator: boolean;
 };
 
 export function fetchMyProfile(): Promise<Profile> {

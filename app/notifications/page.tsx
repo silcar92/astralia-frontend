@@ -59,6 +59,8 @@ function groupOf(iso: string): "Hoy" | "Esta semana" | "Antes" {
 function destinationOf(n: AppNotification): string | null {
   if (n.type === "new_message" && n.target_id) return `/chats/${n.target_id}`;
   if (n.type === "connection_accepted") return "/galaxy";
+  if (n.type === "community_membership_approved" && n.target_id) return `/communities/${n.target_id}`;
+  if (n.type === "event_waitlist_promoted" && n.target_id) return `/events/${n.target_id}`;
   return null;
 }
 

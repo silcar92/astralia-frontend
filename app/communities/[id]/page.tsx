@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { BottomNav } from "@/components/BottomNav";
 import { CommunityBanner, memberLabel } from "@/components/communities/CommunityBanner";
 import { JoinButton } from "@/components/communities/JoinButton";
+import { MembershipRequests } from "@/components/communities/MembershipRequests";
 import { ComposeSheet } from "@/components/cosmos/ComposeSheet";
 import { PostCard } from "@/components/cosmos/PostCard";
 import { useAuth } from "@/hooks/useAuth";
@@ -151,6 +152,34 @@ export default function CommunityDetailPage() {
             </div>
           </div>
 
+          {community.is_moderator && (
+            <>
+              <Link
+                href={`/events/new?community=${community.id}`}
+                className="mt-4 text-center text-xs font-semibold rounded-full py-2.5"
+                style={{ background: "rgba(232,217,181,0.15)", border: "1px solid rgba(232,217,181,0.4)", color: "#F3E9C8" }}
+              >
+                Organizar un evento de la comunidad
+              </Link>
+              {(community.pending_count ?? 0) > 0 && (
+                <MembershipRequests
+                  communityId={community.id}
+                  onDecided={(approved) =>
+                    setCommunity((c) =>
+                      c
+                        ? {
+                            ...c,
+                            pending_count: Math.max(0, (c.pending_count ?? 1) - 1),
+                            member_count: approved ? c.member_count + 1 : c.member_count,
+                          }
+                        : c
+                    )
+                  }
+                />
+              )}
+            </>
+          )}
+
           {isMember ? (
             <>
               <button
@@ -180,6 +209,7 @@ export default function CommunityDetailPage() {
                 </div>
               )}
 
+              {!community.is_moderator && (
               <button
                 type="button"
                 onClick={handleLeave}
@@ -189,6 +219,7 @@ export default function CommunityDetailPage() {
               >
                 Salir de la comunidad
               </button>
+              )}
             </>
           ) : (
             <p className="text-center text-sm mt-10 px-6" style={{ color: "var(--astralia-lilac)" }}>
