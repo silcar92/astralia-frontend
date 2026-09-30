@@ -49,16 +49,25 @@ export async function reverseGeocode(latitude: number, longitude: number, langua
 }
 
 // Ubicación del dispositivo. Se redondea a 2 decimales (~1 km) antes de usarla: Astralia solo necesita la zona.
+export type PositionFailure = "unsupported" | "denied" | "unavailable" | "timeout";
+
+export class PositionError extends Error {
+  constructor(public reason: PositionFailure) {
+    super(reason);
+  }
+}
+
 export function currentPosition(): Promise<{ latitude: number; longitude: number }> {
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
-      reject(new Error("unsupported"));
+      reject(new PositionError("unsupported"));
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve({ latitude: round(pos.coords.latitude, 2), longitude: round(pos.coords.longitude, 2) }),
-      (err) => reject(err),
-      { timeout: 10000, maximumAge: 5 * 60 * 1000 }
+      (err) => reject(new PositionError(err.code === 1 ? "denied" : err.code === 3 ? "timeout" : "unavailable")),
+      // sin alta precisión: basta con la zona y en el celular responde mucho más rápido
+      { timeout: 20000, maximumAge: 5 * 60 * 1000, enableHighAccuracy: false }
     );
   });
 }

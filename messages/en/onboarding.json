@@ -14,7 +14,8 @@
   "submit": "Continue",
   "submitting": "Locating…",
   "livesSame": "I live in my city of birth",
-  "livesTitle": "Where do you live now?"
+  "livesTitle": "Where do you live now?",
+  "tooYoung": "Astralia is for people aged {age} or older."
  },
  "location": {
   "hint": "We use it to show your city and calculate approximate distances. We never show your exact location.",
@@ -22,9 +23,15 @@
   "country": "Country where you live",
   "useMine": "Use my location",
   "locating": "Locating…",
-  "denied": "We couldn't access your location. Type your city and country.",
   "notFound": "We couldn't find that city. Check the spelling.",
-  "found": "Detected location: {place}"
+  "found": "Detected location: {place}",
+  "cityUnknown": "We got your location but couldn't tell the city. Type it so it shows on your profile.",
+  "failed": {
+   "unsupported": "This browser can't use location. Type your city and country.",
+   "denied": "Location permission wasn't granted. Enable it in the browser settings or type your city and country.",
+   "unavailable": "We couldn't get your location. Check that GPS is on or type your city and country.",
+   "timeout": "Finding your location took too long. Try again or type your city and country."
+  }
  },
  "preferences": {
   "step": "Step 2 of 4",

@@ -9,6 +9,7 @@ import { PersonalityStep } from "@/components/onboarding/PersonalityStep";
 import { PreferencesStep, type Preferences } from "@/components/onboarding/PreferencesStep";
 import { RevealStep } from "@/components/onboarding/RevealStep";
 import { useAuth } from "@/hooks/useAuth";
+import { useErrorMessage } from "@/hooks/useErrorMessage";
 import * as profileService from "@/services/profileService";
 import type { PersonalityResult } from "@/services/personalityService";
 
@@ -17,6 +18,7 @@ type Step = "birth" | "preferences" | "personality" | "reveal";
 export default function OnboardingPage() {
   const router = useRouter();
   const t = useTranslations("onboarding.page");
+  const errorMessage = useErrorMessage();
   const { refreshProfile } = useAuth();
 
   const [step, setStep] = useState<Step>("birth");
@@ -45,8 +47,8 @@ export default function OnboardingPage() {
         ...preferences,
       });
       setStep("personality");
-    } catch {
-      setProfileError(t("saveFailed"));
+    } catch (err) {
+      setProfileError(errorMessage(err, "saveFailed"));
     } finally {
       setCreatingProfile(false);
     }

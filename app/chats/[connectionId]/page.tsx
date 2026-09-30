@@ -50,7 +50,8 @@ export default function ChatConversationPage() {
       chatService
         .fetchMessages(connectionId)
         .then((res) => {
-          if (!cancelled) setMessages(res.results);
+          // el sondeo solo actualiza (y hace scroll) si llegó algo nuevo; si no, el chat se quedaba saltando
+          if (!cancelled) setMessages((prev) => (prev && prev.length === res.results.length && prev[prev.length - 1]?.id === res.results[res.results.length - 1]?.id ? prev : res.results));
         })
         .catch((err) => {
           if (!cancelled) setError(errorMessage(err, "loadFailed"));
@@ -91,7 +92,7 @@ export default function ChatConversationPage() {
   return (
     <main
       className="flex flex-col"
-      style={{ height: "100vh", fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}
+      style={{ height: "100dvh", fontFamily: "var(--font-sans)", color: "var(--astralia-text)" }}
     >
       <div
         className="flex items-center gap-3 px-[18px] pt-8 pb-4"

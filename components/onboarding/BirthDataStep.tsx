@@ -23,6 +23,17 @@ export type BirthData = {
   consent_accepted: boolean;
 };
 
+// Edad mínima de Astralia (el backend es quien decide; esto solo evita llegar al final del onboarding para enterarse)
+const MIN_AGE = 16;
+
+function ageOn(isoDate: string): number {
+  const born = new Date(`${isoDate}T00:00:00`);
+  const today = new Date();
+  let age = today.getFullYear() - born.getFullYear();
+  if (today.getMonth() < born.getMonth() || (today.getMonth() === born.getMonth() && today.getDate() < born.getDate())) age--;
+  return age;
+}
+
 export function BirthDataStep({ onNext }: { onNext: (data: BirthData) => void }) {
   const t = useTranslations("onboarding.birth");
   const locale = useLocale();
@@ -42,6 +53,11 @@ export function BirthDataStep({ onNext }: { onNext: (data: BirthData) => void })
 
     if (!consent) {
       setError(t("consentRequired"));
+      return;
+    }
+
+    if (birthDate && ageOn(birthDate) < MIN_AGE) {
+      setError(t("tooYoung", { age: MIN_AGE }));
       return;
     }
 

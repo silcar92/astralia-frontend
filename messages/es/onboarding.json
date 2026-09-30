@@ -14,7 +14,8 @@
   "submit": "Continuar",
   "submitting": "Ubicando…",
   "livesSame": "Vivo en mi ciudad de nacimiento",
-  "livesTitle": "¿Dónde vives ahora?"
+  "livesTitle": "¿Dónde vives ahora?",
+  "tooYoung": "Astralia es para personas de {age} años o más."
  },
  "location": {
   "hint": "La usamos para mostrar tu ciudad y calcular distancias aproximadas. Nunca mostramos tu ubicación exacta.",
@@ -22,9 +23,15 @@
   "country": "País donde vives",
   "useMine": "Usar mi ubicación",
   "locating": "Ubicando…",
-  "denied": "No pudimos acceder a tu ubicación. Escribe tu ciudad y país.",
   "notFound": "No pudimos ubicar esa ciudad. Revisa que esté bien escrita.",
-  "found": "Ubicación detectada: {place}"
+  "found": "Ubicación detectada: {place}",
+  "cityUnknown": "Tomamos tu ubicación, pero no pudimos saber la ciudad. Escríbela para mostrarla en tu perfil.",
+  "failed": {
+   "unsupported": "Este navegador no permite usar la ubicación. Escribe tu ciudad y país.",
+   "denied": "No diste permiso para usar tu ubicación. Actívalo en los ajustes del navegador o escribe tu ciudad y país.",
+   "unavailable": "No pudimos obtener tu ubicación. Revisa que el GPS esté activo o escribe tu ciudad y país.",
+   "timeout": "Tardó demasiado en encontrar tu ubicación. Intenta de nuevo o escribe tu ciudad y país."
+  }
  },
  "preferences": {
   "step": "Paso 2 de 4",

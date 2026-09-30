@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { TextField } from "@/components/ui/TextField";
-import { currentPosition, geocodePlace, reverseGeocode } from "@/lib/geocode";
+import { currentPosition, geocodePlace, PositionError, reverseGeocode } from "@/lib/geocode";
 
 export type LocationValue = { city: string; country: string; latitude: number; longitude: number };
 
@@ -18,7 +18,7 @@ export function useLocationField(initial?: { city?: string; country?: string }) 
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(null);
   const [dirty, setDirty] = useState(false);
   const [locating, setLocating] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
 
   const setCity = (value: string) => {
     setCityState(value);
@@ -36,15 +36,20 @@ export function useLocationField(initial?: { city?: string; country?: string }) 
     setLocating(true);
     try {
       const position = await currentPosition();
-      const place = await reverseGeocode(position.latitude, position.longitude, locale);
       setCoords(position);
-      if (place) {
+      setDirty(true);
+      // el GPS ya respondió; si no se puede traducir a ciudad, se pide escribirla pero las coordenadas se conservan
+      const place = await reverseGeocode(position.latitude, position.longitude, locale).catch(() => null);
+      if (place && (place.city || place.country)) {
         setCityState(place.city);
         setCountryState(place.country);
+        setNotice({ kind: "ok", text: t("found", { place: [place.city, place.country].filter(Boolean).join(", ") }) });
+      } else {
+        setNotice({ kind: "error", text: t("cityUnknown") });
       }
-      setDirty(true);
-    } catch {
-      setNotice(t("denied"));
+    } catch (error) {
+      const reason = error instanceof PositionError ? error.reason : "unavailable";
+      setNotice({ kind: "error", text: t(`failed.${reason}`) });
     } finally {
       setLocating(false);
     }
@@ -56,7 +61,7 @@ export function useLocationField(initial?: { city?: string; country?: string }) 
     if (coords) return { city, country, ...coords };
     const place = await geocodePlace(`${city}, ${country}`, locale);
     if (!place) {
-      setNotice(t("notFound"));
+      setNotice({ kind: "error", text: t("notFound") });
       return null;
     }
     return { city: city.trim() || place.city, country: country.trim() || place.country, latitude: place.latitude, longitude: place.longitude };
@@ -91,8 +96,8 @@ export function LocationFields({ field }: { field: ReturnType<typeof useLocation
         {t("hint")}
       </p>
       {field.notice && (
-        <p className="text-xs" style={{ color: "var(--astralia-alert)" }} role="alert">
-          {field.notice}
+        <p className="text-xs" style={{ color: field.notice.kind === "ok" ? "var(--astralia-gold)" : "var(--astralia-alert)" }} role={field.notice.kind === "ok" ? "status" : "alert"}>
+          {field.notice.text}
         </p>
       )}
     </div>
